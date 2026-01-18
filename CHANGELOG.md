@@ -5,9 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-01-18
 
 ### Added
+- Initial release of derive symbolic mathematics library
+- Core symbolic computation functionality built on SymPy
+- Numerical computation support via NumPy and SciPy
+- Data manipulation with Polars integration
+- Visualization capabilities through Matplotlib
+- Interactive notebook support with marimo
+- GitHub-rendered notebook exports
 - New `utils/validation.py` module with reusable validation utilities
   - `validate_tuple`, `validate_range_tuple`, `validate_positive`, `validate_nonnegative`
   - `ValidationError` exception class for consistent error handling
@@ -47,23 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pre-computed metric substitutions in coordinate transforms for better performance
 
 ### Fixed
+- LaTeX printing issue
+- Variable aliasing issue (#1)
 - Replaced bare `except` clauses with specific exception types for better error handling
   - `patterns/matching.py`: Rule.apply and ReplaceAll now catch (TypeError, ValueError, AttributeError)
   - `patterns/functions.py`: PatternFunction matching now catches specific exceptions
   - `utils/compose.py`: FixedPoint and FixedPointList now catch (TypeError, ValueError, AttributeError)
   - `core/numbers.py`: rationalize and nsimplify now catch (TypeError, ValueError)
-
-## [0.1.0] - 2026-01-18
-
-### Added
-- Initial release of derive symbolic mathematics library
-- Core symbolic computation functionality built on SymPy
-- Numerical computation support via NumPy and SciPy
-- Data manipulation with Polars integration
-- Visualization capabilities through Matplotlib
-- Interactive notebook support with marimo
-- GitHub-rendered notebook exports
-
-### Fixed
-- LaTeX printing issue
-- Variable aliasing issue (#1)
