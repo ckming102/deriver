@@ -58,10 +58,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Applies finite difference stencils in both directions
 - `ChangeVariables` now warns when non-injective substitutions yield multiple solutions (#11)
   - Alerts users to use domain restrictions (e.g., `positive=True`)
-- `OptVar._registry` now uses strong references to prevent silent bound loss (#15)
-  - Reverts #12's `WeakValueDictionary` approach which caused inline `OptVar` bounds to be dropped
-  - Example: `Minimize(OptVar('x', bounds=(0, 1)))` now correctly applies bounds
-  - Note: `WeakKeyDictionary` is not viable because `cp.Variable` overrides `__eq__`
+- `OptVar` bounds no longer silently dropped for inline usage (#15)
+  - `Minimize(OptVar('x', bounds=(0, 1)))` now correctly applies bounds
+  - OptVars are held by the problem instance during solve, then cleaned from global registry
+  - Fixes #12's `WeakValueDictionary` approach while still preventing memory leaks
 - `ExpressionCache` docstring incorrectly claimed weak reference usage (#14)
   - Updated to accurately describe FIFO eviction behavior
 

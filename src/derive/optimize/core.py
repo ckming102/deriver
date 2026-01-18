@@ -227,6 +227,7 @@ class OptimizationProblem:
         self.sense = sense
         self._problem = None
         self._status = None
+        self._optvars = []  # Holds OptVars to prevent GC during solve
 
     def solve(
         self,
@@ -263,12 +264,12 @@ class OptimizationProblem:
         cvx_constraints = [_to_cvx(c) for c in self.constraints]
 
         # Collect all OptVar instances and add their bound constraints
-        all_vars = []
-        _collect_optvars(self.objective, all_vars)
+        self._optvars = []
+        _collect_optvars(self.objective, self._optvars)
         for c in self.constraints:
-            _collect_optvars(c, all_vars)
+            _collect_optvars(c, self._optvars)
 
-        for var in all_vars:
+        for var in self._optvars:
             cvx_constraints.extend(var.get_bound_constraints())
 
         # Create and solve problem
@@ -281,6 +282,11 @@ class OptimizationProblem:
 
         result = self._problem.solve(**solve_kwargs)
         self._status = self._problem.status
+
+        # Clean up global registry - OptVars are now held by self._optvars
+        for var in self._optvars:
+            if var._cvx_var is not None:
+                OptVar._registry.pop(id(var._cvx_var), None)
 
         return result
 
