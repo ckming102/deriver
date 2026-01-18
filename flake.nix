@@ -1,54 +1,37 @@
 {
-  description = "A flake for derive.py";
+  description = "deriver dev shell (deps from pyproject.toml via pyproject-nix)";
 
-  inputs.pyproject-nix.url = "github:closedform/deriver";
-  inputs.pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs =
-    { nixpkgs, pyproject-nix, ... }:
+    pyproject-nix.url = "github:pyproject-nix/pyproject.nix";
+    pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { nixpkgs, pyproject-nix, ... }:
     let
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+
       project = pyproject-nix.lib.project.loadPyproject {
         projectRoot = ./.;
       };
-
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
-
-      # We are using the default nixpkgs Python3 interpreter & package set.
-      #
-      # This means that you are purposefully ignoring:
-      # - Version bounds
-      # - Dependency sources (meaning local path dependencies won't resolve to the local path)
-      #
-      # To use packages from local sources see "Overriding Python packages" in the nixpkgs manual:
-      # https://nixos.org/manual/nixpkgs/stable/#reference
-      #
-      # Or use an overlay generator such as uv2nix:
-      # https://github.com/pyproject-nix/uv2nix
-      python = pkgs.python3;
-
     in
     {
-      # Create a development shell containing dependencies from `pyproject.toml`
-      devShells.x86_64-linux.default =
+      devShells = nixpkgs.lib.genAttrs systems (system:
         let
-          # Returns a function that can be passed to `python.withPackages`
-          arg = project.renderers.withPackages { inherit python; };
+          pkgs = nixpkgs.legacyPackages.${system};
+          python = pkgs.python3;
 
-          # Returns a wrapped environment (virtualenv like) with all our packages
-          pythonEnv = python.withPackages arg;
-
+          pythonEnv =
+            python.withPackages (project.renderers.withPackages { inherit python; });
         in
-        # Create a devShell like normal.
-        pkgs.mkShell { packages = [ pythonEnv ]; };
+        {
+          default = pkgs.mkShell {
+            packages = [ pythonEnv ];
 
-      # Build our package using `buildPythonPackage
-      packages.x86_64-linux.default =
-        let
-          # Returns an attribute set that can be passed to `buildPythonPackage`.
-          attrs = project.renderers.buildPythonPackage { inherit python; };
-        in
-        # # Pass attributes to buildPythonPackage.
-        # # Here is a good spot to add on any missing or custom attributes.
-        # python.pkgs.buildPythonPackage (attrs // { env.CUSTOM_ENVVAR = "hello"; });
+            # deriver is in src/derive, so make src importable
+            PYTHONPATH = "src";
+          };
+        });
     };
 }
