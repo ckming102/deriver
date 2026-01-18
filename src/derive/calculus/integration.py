@@ -17,6 +17,7 @@ Internal Refs:
 """
 
 from typing import Any, Union, Tuple
+import warnings
 
 from derive.core.math_api import (
     sp, np,
@@ -153,6 +154,26 @@ def ChangeVariables(
         # Solve for new bounds: find u such that substitution = a, substitution = b
         new_a_solutions = solve(substitution - a, new_var)
         new_b_solutions = solve(substitution - b, new_var)
+
+        # Check for non-injective substitutions (multiple solutions)
+        if len(new_a_solutions) > 1:
+            warnings.warn(
+                f"Non-injective substitution detected: solve({substitution} - {a}, {new_var}) "
+                f"has {len(new_a_solutions)} solutions: {new_a_solutions}. "
+                f"Using first solution {new_a_solutions[0]}. Consider restricting the domain "
+                f"or specifying the new variable with appropriate assumptions (e.g., positive=True).",
+                UserWarning,
+                stacklevel=2
+            )
+        if len(new_b_solutions) > 1:
+            warnings.warn(
+                f"Non-injective substitution detected: solve({substitution} - {b}, {new_var}) "
+                f"has {len(new_b_solutions)} solutions: {new_b_solutions}. "
+                f"Using first solution {new_b_solutions[0]}. Consider restricting the domain "
+                f"or specifying the new variable with appropriate assumptions (e.g., positive=True).",
+                UserWarning,
+                stacklevel=2
+            )
 
         # Take the first real solution (could be improved with assumptions)
         new_a = new_a_solutions[0] if new_a_solutions else a

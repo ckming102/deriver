@@ -308,6 +308,53 @@ class TestToStencil:
         assert 'h' in code
 
 
+class TestMixedPartialDerivatives:
+    """Tests for mixed partial derivative discretization (Issue #10 fix)."""
+
+    def test_mixed_partial_dxdy(self):
+        """Test discretization of d^2f/dxdy."""
+        x, y = symbols('x y')
+        hx, hy = symbols('h_x h_y')
+        f = Function('f')(x, y)
+
+        # Mixed partial d^2f/dxdy
+        expr = D(D(f, x), y)
+        step_map = {
+            x: ([x - hx, x, x + hx], hx),
+            y: ([y - hy, y, y + hy], hy),
+        }
+        result = Discretize(expr, step_map)
+
+        # Result should contain offsets in BOTH x and y
+        result_str = str(result)
+        assert 'h_x' in result_str
+        assert 'h_y' in result_str
+        # Should have terms with both x and hx offsets (SymPy may order as -h_x + x or h_x + x)
+        assert 'h_x + x' in result_str or '-h_x + x' in result_str
+        # Should have terms with both y and hy offsets
+        assert 'h_y + y' in result_str or '-h_y + y' in result_str
+
+    def test_mixed_partial_higher_order(self):
+        """Test discretization of d^3f/dx^2dy."""
+        x, y = symbols('x y')
+        hx, hy = symbols('h_x h_y')
+        f = Function('f')(x, y)
+
+        # d^3f/dx^2 dy
+        expr = D(D(f, (x, 2)), y)
+        step_map = {
+            x: ([x - hx, x, x + hx], hx),
+            y: ([y - hy, y, y + hy], hy),
+        }
+        result = Discretize(expr, step_map)
+
+        # Result should be non-trivial and contain both step sizes
+        assert result is not None
+        result_str = str(result)
+        assert 'h_x' in result_str
+        assert 'h_y' in result_str
+
+
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
 

@@ -2,6 +2,8 @@
 Test suite for integral transforms and change of variables.
 """
 
+import warnings
+
 import pytest
 from sympy import sqrt, pi, exp, Heaviside, Integral, Abs, simplify, oo
 from derive import (
@@ -181,3 +183,36 @@ class TestTransformRoundTrip:
         recovered = InverseLaplaceTransform(transformed, s, t)
         # Both should represent the same function
         assert simplify(recovered - original) == 0
+
+
+class TestNonInjectiveSubstitution:
+    """Tests for non-injective substitution warnings (Issue #11 fix)."""
+
+    def test_non_injective_substitution_warns(self):
+        """Non-injective substitution should emit a warning."""
+        # u without positive assumption can yield multiple solutions for u^2 = 4
+        u = Symbol('u')
+        x = Symbol('x')
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            # x = u^2 with bounds (0, 4) - solve(u^2 - 4) gives [-2, 2]
+            result, bounds_map = ChangeVariables(Sqrt(x), x, u, u**2, bounds=(0, 4))
+
+            # Should have warnings about non-injective substitution
+            warning_messages = [str(warning.message) for warning in w]
+            assert any('Non-injective' in msg for msg in warning_messages)
+
+    def test_injective_substitution_no_warning(self):
+        """Properly constrained substitution should not warn."""
+        # u with positive=True ensures unique solution
+        u = Symbol('u', positive=True)
+        x = Symbol('x', positive=True)
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result, bounds_map = ChangeVariables(Sqrt(x), x, u, u**2, bounds=(0, 4))
+
+            # Should have no non-injective warnings
+            warning_messages = [str(warning.message) for warning in w]
+            assert not any('Non-injective' in msg for msg in warning_messages)

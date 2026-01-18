@@ -48,6 +48,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PySR/Julia now truly lazy-loaded - only initialized when `FindFormula()` is called
   - Fixes marimo notebook export hanging due to Julia initialization
   - Importing `derive` no longer triggers Julia startup
+- `Assuming` context manager now preserves pre-existing global assumptions on exit (#7)
+- `OptVar` bounds parameter now enforced during optimization solve (#8)
+  - Bounds are automatically collected and applied as constraints
+- cvxpy helper functions now raise clear `ImportError` when cvxpy not installed (#9)
+  - Affects `is_solved`, `Norm()`, `Sum()`, `Quad()`, `PositiveSemidefinite()`
+- `Discretizer` now correctly handles mixed partial derivatives like d^2f/dxdy (#10)
+  - Decomposes mixed partials into nested single-variable derivatives
+  - Applies finite difference stencils in both directions
+- `ChangeVariables` now warns when non-injective substitutions yield multiple solutions (#11)
+  - Alerts users to use domain restrictions (e.g., `positive=True`)
 
 ## [0.2.0] - 2026-01-18
 

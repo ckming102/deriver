@@ -53,6 +53,9 @@ class OptVar:
         >>> w = OptVar('w', bounds=(0, 10))
     """
 
+    # Registry mapping cvxpy Variables to OptVars for bound collection
+    _registry: dict = {}
+
     def __init__(
         self,
         name: str,
@@ -70,8 +73,6 @@ class OptVar:
     def _get_cvxpy_var(self):
         """Create or return the underlying cvxpy variable."""
         if self._cvx_var is None:
-
-
             # Map domain to cvxpy options
             kwargs = {'name': self.name}
             if self.shape:
@@ -87,8 +88,31 @@ class OptVar:
                 kwargs['boolean'] = True
 
             self._cvx_var = cp.Variable(**kwargs)
+            # Register for bound collection
+            OptVar._registry[id(self._cvx_var)] = self
 
         return self._cvx_var
+
+    def get_bound_constraints(self):
+        """
+        Return constraint expressions for the bounds.
+
+        Returns:
+            List of cvxpy constraints (empty if no bounds specified)
+        """
+        if self.bounds is None:
+            return []
+
+        lower, upper = self.bounds
+        cvx_var = self._get_cvxpy_var()
+        constraints = []
+
+        if lower is not None:
+            constraints.append(cvx_var >= lower)
+        if upper is not None:
+            constraints.append(cvx_var <= upper)
+
+        return constraints
 
     @property
     def value(self):
@@ -155,6 +179,28 @@ def _to_cvx(obj):
     return obj
 
 
+def _collect_optvars(obj, collected=None):
+    """Recursively collect all OptVar instances from an expression."""
+    if collected is None:
+        collected = []
+
+    if isinstance(obj, OptVar):
+        # Use identity check since OptVar.__eq__ is overridden for constraints
+        if not any(v is obj for v in collected):
+            collected.append(obj)
+    elif CVXPY_AVAILABLE and isinstance(obj, cp.Variable):
+        # Look up the OptVar from the registry
+        optvar = OptVar._registry.get(id(obj))
+        if optvar is not None and not any(v is optvar for v in collected):
+            collected.append(optvar)
+    elif hasattr(obj, 'args'):
+        # cvxpy expression - traverse arguments
+        for arg in obj.args:
+            _collect_optvars(arg, collected)
+
+    return collected
+
+
 class OptimizationProblem:
     """
     Base class for optimization problems.
@@ -202,7 +248,7 @@ class OptimizationProblem:
             >>> prob.solve()
             1.0
         """
-
+        _require_cvxpy()
 
         # Build objective
         if self.sense == 'minimize':
@@ -212,6 +258,15 @@ class OptimizationProblem:
 
         # Convert constraints
         cvx_constraints = [_to_cvx(c) for c in self.constraints]
+
+        # Collect all OptVar instances and add their bound constraints
+        all_vars = []
+        _collect_optvars(self.objective, all_vars)
+        for c in self.constraints:
+            _collect_optvars(c, all_vars)
+
+        for var in all_vars:
+            cvx_constraints.extend(var.get_bound_constraints())
 
         # Create and solve problem
         self._problem = cp.Problem(obj, cvx_constraints)
@@ -234,6 +289,7 @@ class OptimizationProblem:
     @property
     def is_solved(self) -> bool:
         """Check if problem was solved optimally."""
+        _require_cvxpy()
         return self._status == cp.OPTIMAL
 
     @property
@@ -306,7 +362,7 @@ def Norm(x, p: int = 2):
     Returns:
         cvxpy norm expression
     """
-
+    _require_cvxpy()
     return cp.norm(_to_cvx(x), p)
 
 
@@ -320,7 +376,7 @@ def Sum(x):
     Returns:
         cvxpy sum expression
     """
-
+    _require_cvxpy()
     return cp.sum(_to_cvx(x))
 
 
@@ -335,7 +391,7 @@ def Quad(x, Q=None):
     Returns:
         cvxpy quadratic expression
     """
-
+    _require_cvxpy()
     cvx_x = _to_cvx(x)
     if Q is None:
         return cp.sum_squares(cvx_x)
@@ -352,7 +408,7 @@ def PositiveSemidefinite(X):
     Returns:
         cvxpy PSD constraint
     """
-
+    _require_cvxpy()
     return _to_cvx(X) >> 0
 
 

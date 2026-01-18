@@ -45,6 +45,28 @@ class TestOptVar:
         x = OptVar('x', bounds=(0, 10))
         assert x.bounds == (0, 10)
 
+    def test_get_bound_constraints(self):
+        """Test that get_bound_constraints returns proper constraints."""
+        x = OptVar('x', bounds=(0, 10))
+        constraints = x.get_bound_constraints()
+        assert len(constraints) == 2
+
+    def test_get_bound_constraints_no_bounds(self):
+        """Test that get_bound_constraints returns empty list when no bounds."""
+        x = OptVar('x')
+        constraints = x.get_bound_constraints()
+        assert len(constraints) == 0
+
+    def test_get_bound_constraints_partial_bounds(self):
+        """Test partial bounds (only lower or upper)."""
+        x = OptVar('x', bounds=(0, None))
+        constraints = x.get_bound_constraints()
+        assert len(constraints) == 1
+
+        y = OptVar('y', bounds=(None, 10))
+        constraints = y.get_bound_constraints()
+        assert len(constraints) == 1
+
     def test_repr(self):
         """Test string representation."""
         x = OptVar('x', domain='nonneg')
@@ -191,6 +213,43 @@ class TestSumQuad:
 # =============================================================================
 # Edge Cases
 # =============================================================================
+
+class TestBoundsEnforcement:
+    """Tests for bounds enforcement in optimization."""
+
+    def test_bounds_enforced_in_minimize(self):
+        """Test that bounds are actually enforced during minimization."""
+        x = OptVar('x', bounds=(2, 10))
+        prob = Minimize(x)  # Without bounds, min would be unbounded
+        result = prob.solve()
+        assert prob.is_solved
+        assert abs(x.value - 2.0) < 1e-4  # Should find min at lower bound
+
+    def test_bounds_enforced_in_maximize(self):
+        """Test that bounds are enforced during maximization."""
+        x = OptVar('x', bounds=(0, 5))
+        prob = Maximize(x)
+        result = prob.solve()
+        assert prob.is_solved
+        assert abs(x.value - 5.0) < 1e-4  # Should find max at upper bound
+
+    def test_bounds_with_other_constraints(self):
+        """Test bounds combined with explicit constraints."""
+        x = OptVar('x', bounds=(0, 10))
+        prob = Minimize(x**2, [x >= 3])  # Explicit constraint tighter than bound
+        result = prob.solve()
+        assert prob.is_solved
+        assert abs(x.value - 3.0) < 1e-4  # Should respect the tighter constraint
+
+    def test_bounds_make_problem_feasible(self):
+        """Test that bounds properly constrain the solution space."""
+        x = OptVar('x', bounds=(1, 5))
+        y = OptVar('y', bounds=(1, 5))
+        prob = Minimize(x + y)
+        result = prob.solve()
+        assert prob.is_solved
+        assert abs(result - 2.0) < 1e-4  # Both at lower bounds
+
 
 class TestEdgeCases:
     """Tests for edge cases."""

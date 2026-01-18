@@ -41,6 +41,46 @@ class TestAssuming:
         from sympy.assumptions.assume import global_assumptions
         assert Q.positive(x) not in global_assumptions
 
+    def test_assuming_preserves_preexisting_assumptions(self):
+        """Pre-existing global assumptions are preserved after context exit."""
+        x, y = symbols('x y')
+        from sympy.assumptions.assume import global_assumptions
+
+        # Add a pre-existing assumption
+        global_assumptions.add(Q.positive(x))
+        try:
+            assert Q.positive(x) in global_assumptions
+
+            # Enter context with new assumption
+            with Assuming(Q.positive(y)):
+                assert Q.positive(x) in global_assumptions
+                assert Q.positive(y) in global_assumptions
+
+            # After exit, pre-existing assumption should persist
+            assert Q.positive(x) in global_assumptions
+            assert Q.positive(y) not in global_assumptions
+        finally:
+            # Cleanup
+            global_assumptions.discard(Q.positive(x))
+
+    def test_assuming_with_duplicate_preexisting(self):
+        """Re-adding a pre-existing assumption should not drop it on exit."""
+        x = Symbol('x')
+        from sympy.assumptions.assume import global_assumptions
+
+        # Add a pre-existing assumption
+        global_assumptions.add(Q.positive(x))
+        try:
+            # Enter context re-adding the same assumption
+            with Assuming(Q.positive(x)):
+                assert Q.positive(x) in global_assumptions
+
+            # After exit, the pre-existing assumption should still be there
+            assert Q.positive(x) in global_assumptions
+        finally:
+            # Cleanup
+            global_assumptions.discard(Q.positive(x))
+
     def test_multiple_assumptions(self):
         """Multiple assumptions in one context."""
         x, y = symbols('x y')

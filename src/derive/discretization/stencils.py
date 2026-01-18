@@ -82,7 +82,10 @@ class Discretizer:
 
     def _discretize_derivative(self, deriv: Derivative) -> Expr:
         """
-        Convert a single derivative to finite difference.
+        Convert a derivative (including mixed partials) to finite difference.
+
+        For mixed partial derivatives like d^2f/dxdy, this decomposes them into
+        nested single-variable derivatives and processes each one sequentially.
 
         Args:
             deriv: SymPy Derivative object.
@@ -93,6 +96,39 @@ class Discretizer:
         if not deriv.variables:
             return deriv
 
+        # Get unique variables
+        unique_vars = []
+        for var in deriv.variables:
+            if var not in unique_vars:
+                unique_vars.append(var)
+
+        # Check if this is a mixed partial (multiple unique variables)
+        if len(unique_vars) > 1:
+            # Decompose into nested derivatives and process sequentially
+            # For Derivative(f, x, y), create Derivative(Derivative(f, x), y)
+            inner_expr = deriv.expr
+            result = inner_expr
+
+            # Process each variable's derivatives in sequence
+            for var in unique_vars:
+                if var not in self.step_map:
+                    # Keep as symbolic derivative for this variable
+                    count = deriv.variables.count(var)
+                    result = Derivative(result, *([var] * count))
+                else:
+                    # Count how many times this variable appears
+                    count = deriv.variables.count(var)
+                    # Create derivative for just this variable
+                    var_deriv = Derivative(result, *([var] * count))
+                    # Apply finite difference
+                    points, step = self.step_map[var]
+                    result = var_deriv.as_finite_difference(points, var)
+                    # Recursively process the result
+                    result = self._recurse(result)
+
+            return result
+
+        # Single variable derivative - use original logic
         wrt = deriv.variables[0]
 
         if wrt in self.step_map:

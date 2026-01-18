@@ -32,6 +32,8 @@ def Assuming(*conditions):
     Within the context, expressions will simplify according to the given
     assumptions. Assumptions are automatically removed when exiting the context.
 
+    Pre-existing global assumptions are preserved after the context exits.
+
     Args:
         *conditions: One or more assumption conditions (e.g., Q.positive(x))
 
@@ -48,15 +50,19 @@ def Assuming(*conditions):
         ...     result = simplify_with_assumptions(sqrt(x**2))
         ...     print(result)  # x
     """
-    # Add all conditions to global assumptions
+    # Track which conditions are newly added (not pre-existing)
+    newly_added = []
+
     for condition in conditions:
+        if condition not in global_assumptions:
+            newly_added.append(condition)
         global_assumptions.add(condition)
 
     try:
         yield
     finally:
-        # Remove the conditions when exiting
-        for condition in conditions:
+        # Remove only the conditions we newly added
+        for condition in newly_added:
             global_assumptions.remove(condition)
 
 
