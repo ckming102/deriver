@@ -3,6 +3,11 @@ name = "derive"
 version = "0.1.0"
 description = "A powerful symbolic mathematics library for Python"
 readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Brandon DiNunno" },
+    { name = "Tom Mainiero" },
+]
 requires-python = ">=3.12"
 dependencies = [
     "sympy>=1.13",
