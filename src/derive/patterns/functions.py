@@ -155,14 +155,14 @@ class PatternFunction:
                         try:
                             if not condition(match):
                                 continue
-                        except:
+                        except (TypeError, ValueError, AttributeError):
                             continue
 
                     # Apply substitution
                     try:
                         result = replacement.xreplace(match)
                         return result, True
-                    except:
+                    except (TypeError, ValueError, AttributeError):
                         continue
 
         return arg, False

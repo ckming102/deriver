@@ -7,6 +7,9 @@ name of the alias rather than the underlying library function.
 
 from typing import Any, Callable
 
+from sympy.printing.pretty.pretty import PrettyPrinter
+from sympy.printing.str import StrPrinter
+
 
 class FunctionAlias:
     """Callable wrapper that preserves a friendly name when printed."""
@@ -37,12 +40,6 @@ def _patch_sympy_printers() -> None:
     """Patch SymPy string printers so they respect alias names when available."""
     global _PRINTERS_PATCHED
     if _PRINTERS_PATCHED:
-        return
-
-    try:
-        from sympy.printing.pretty.pretty import PrettyPrinter
-        from sympy.printing.str import StrPrinter
-    except ImportError:  # pragma: no cover - sympy always present in runtime
         return
 
     def _wrap(printer_cls):

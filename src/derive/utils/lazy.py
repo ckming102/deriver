@@ -5,8 +5,10 @@ Provides lazy evaluation patterns for expensive symbolic computations,
 allowing expressions to be built up without immediate evaluation.
 """
 
-from typing import Any, Callable, TypeVar, Generic, Optional
 from functools import wraps
+from typing import Any, Callable, TypeVar, Generic, Optional
+
+from sympy import simplify as sympy_simplify
 
 T = TypeVar('T')
 
@@ -107,8 +109,7 @@ class LazyExpr:
             The expression, simplified if auto_simplify was True.
         """
         if self._auto_simplify and not self._simplified:
-            from sympy import simplify
-            self._value = simplify(self._expr)
+            self._value = sympy_simplify(self._expr)
             self._simplified = True
             return self._value
         return self._expr
@@ -120,8 +121,7 @@ class LazyExpr:
 
     def simplify(self) -> Any:
         """Force simplification and return the result."""
-        from sympy import simplify
-        self._value = simplify(self._expr)
+        self._value = sympy_simplify(self._expr)
         self._simplified = True
         return self._value
 

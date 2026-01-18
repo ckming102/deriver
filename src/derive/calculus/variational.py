@@ -34,11 +34,11 @@ def VariationalDerivative(lagrangian: sp.Expr, field: Function, coords: List[Sym
     Examples:
         >>> x, t = symbols('x t')
         >>> phi = Function('phi')(x, t)
-        >>> # Klein-Gordon Lagrangian: L = (1/2)(∂_t φ)^2 - (1/2)(∂_x φ)^2 - (1/2)m^2 φ^2
+        >>> # Klein-Gordon Lagrangian: L = (1/2)(partial_t phi)^2 - (1/2)(partial_x phi)^2 - (1/2)m^2 phi^2
         >>> m = Symbol('m')
-        >>> L = Rational(1,2)*diff(phi, t)**2 - Rational(1,2)*diff(phi, x)**2 - Rational(1,2)*m**2*phi**2
+        >>> L = Rational(1,2)*D(phi, t)**2 - Rational(1,2)*D(phi, x)**2 - Rational(1,2)*m**2*phi**2
         >>> eq = VariationalDerivative(L, phi, [x, t])
-        >>> # Should give: ∂_t^2 φ - ∂_x^2 φ + m^2 φ = 0
+        >>> # Should give: partial_t^2 phi - partial_x^2 phi + m^2 phi = 0
     """
     # Get the field and its derivatives
     result = D(lagrangian, field)

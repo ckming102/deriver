@@ -5,10 +5,12 @@ Provides memoization decorators and caching utilities for expensive
 symbolic computations like Christoffel symbols, curvature tensors, etc.
 """
 
-from typing import Any, Callable, Dict, Optional, TypeVar, Hashable
-from functools import wraps
-import weakref
 import hashlib
+import weakref
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, TypeVar, Hashable
+
+from sympy import simplify as sympy_simplify
 
 T = TypeVar('T')
 
@@ -193,12 +195,10 @@ def cached_simplify(expr: Any) -> Any:
     Any
         The simplified expression.
     """
-    from sympy import simplify
-
     if expr in _simplify_cache:
         return _simplify_cache.get(expr)
 
-    result = simplify(expr)
+    result = sympy_simplify(expr)
     _simplify_cache.set(expr, result)
     return result
 

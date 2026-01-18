@@ -6,9 +6,19 @@ Sign, Floor, Ceiling, N, Round, Mod, GCD, LCM, PrimeQ, Prime, FactorInteger
 """
 
 from typing import Any, List, Optional, Literal
+
 import sympy as sp
 from sympy import sign, floor, ceiling, gcd, lcm, isprime, prime, factorint
+
 from derive.functions.utils import alias_function
+
+# Optional dependency for mpmath
+try:
+    import mpmath
+    MPMATH_AVAILABLE = True
+except ImportError:
+    MPMATH_AVAILABLE = False
+    mpmath = None
 
 # Direct aliases
 Sign = alias_function('Sign', sign)
@@ -57,32 +67,28 @@ def N(
 
     elif method == 'mpfr':
         # Use mpmath for arbitrary precision
-        try:
-            import mpmath
-            mpmath.mp.dps = n  # Set decimal places
-            # Convert sympy expression to mpmath
-            if hasattr(expr, 'evalf'):
-                # Get high-precision string and convert to mpf
-                val_str = str(expr.evalf(n + 5))
-                return mpmath.mpf(val_str)
-            return mpmath.mpf(expr)
-        except ImportError:
+        if not MPMATH_AVAILABLE:
             raise ImportError("mpmath is required for method='mpfr'. Install with: pip install mpmath")
+        mpmath.mp.dps = n  # Set decimal places
+        # Convert sympy expression to mpmath
+        if hasattr(expr, 'evalf'):
+            # Get high-precision string and convert to mpf
+            val_str = str(expr.evalf(n + 5))
+            return mpmath.mpf(val_str)
+        return mpmath.mpf(expr)
 
     elif method == 'interval':
         # Use interval arithmetic for rigorous bounds
-        try:
-            import mpmath
-            mpmath.mp.dps = n
-            if hasattr(expr, 'evalf'):
-                # Use interval arithmetic
-                val = float(expr.evalf(n + 5))
-                # Create interval with uncertainty based on precision
-                eps = 10 ** (-n)
-                return mpmath.mpi(val - eps, val + eps)
-            return mpmath.mpi(expr)
-        except ImportError:
+        if not MPMATH_AVAILABLE:
             raise ImportError("mpmath is required for method='interval'. Install with: pip install mpmath")
+        mpmath.mp.dps = n
+        if hasattr(expr, 'evalf'):
+            # Use interval arithmetic
+            val = float(expr.evalf(n + 5))
+            # Create interval with uncertainty based on precision
+            eps = 10 ** (-n)
+            return mpmath.mpi(val - eps, val + eps)
+        return mpmath.mpi(expr)
 
     elif method == 'floating':
         # Standard IEEE 754 float

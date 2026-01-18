@@ -6,10 +6,28 @@ Provides a simple interface while letting cvxpy handle solver backends.
 """
 
 from typing import Any, List, Optional, Union, Literal
+
 import sympy as sp
+
+# Optional dependency for cvxpy
+try:
+    import cvxpy as cp
+    CVXPY_AVAILABLE = True
+except ImportError:
+    CVXPY_AVAILABLE = False
+    cp = None
 
 # Type alias for constraints
 Constraint = Any
+
+
+def _require_cvxpy():
+    """Raise ImportError if cvxpy is not available."""
+    if not CVXPY_AVAILABLE:
+        raise ImportError(
+            "cvxpy is required for optimization. "
+            "Install with: pip install cvxpy"
+        )
 
 
 class OptVar:
@@ -47,13 +65,7 @@ class OptVar:
     def _get_cvxpy_var(self):
         """Create or return the underlying cvxpy variable."""
         if self._cvx_var is None:
-            try:
-                import cvxpy as cp
-            except ImportError:
-                raise ImportError(
-                    "cvxpy is required for optimization. "
-                    "Install with: pip install cvxpy"
-                )
+            _require_cvxpy()
 
             # Map domain to cvxpy options
             kwargs = {'name': self.name}
@@ -106,7 +118,7 @@ class OptVar:
         return self._get_cvxpy_var() / _to_cvx(other)
 
     def __pow__(self, other):
-        import cvxpy as cp
+        _require_cvxpy()
         return cp.power(self._get_cvxpy_var(), other)
 
     def __neg__(self):
@@ -185,13 +197,7 @@ class OptimizationProblem:
             >>> prob.solve()
             1.0
         """
-        try:
-            import cvxpy as cp
-        except ImportError:
-            raise ImportError(
-                "cvxpy is required for optimization. "
-                "Install with: pip install cvxpy"
-            )
+        _require_cvxpy()
 
         # Build objective
         if self.sense == 'minimize':
@@ -223,11 +229,9 @@ class OptimizationProblem:
     @property
     def is_solved(self) -> bool:
         """Check if problem was solved optimally."""
-        try:
-            import cvxpy as cp
-            return self._status == cp.OPTIMAL
-        except ImportError:
+        if not CVXPY_AVAILABLE:
             return False
+        return self._status == cp.OPTIMAL
 
     @property
     def optimal_value(self) -> Optional[float]:
@@ -299,11 +303,7 @@ def Norm(x, p: int = 2):
     Returns:
         cvxpy norm expression
     """
-    try:
-        import cvxpy as cp
-    except ImportError:
-        raise ImportError("cvxpy required")
-
+    _require_cvxpy()
     return cp.norm(_to_cvx(x), p)
 
 
@@ -317,11 +317,7 @@ def Sum(x):
     Returns:
         cvxpy sum expression
     """
-    try:
-        import cvxpy as cp
-    except ImportError:
-        raise ImportError("cvxpy required")
-
+    _require_cvxpy()
     return cp.sum(_to_cvx(x))
 
 
@@ -336,11 +332,7 @@ def Quad(x, Q=None):
     Returns:
         cvxpy quadratic expression
     """
-    try:
-        import cvxpy as cp
-    except ImportError:
-        raise ImportError("cvxpy required")
-
+    _require_cvxpy()
     cvx_x = _to_cvx(x)
     if Q is None:
         return cp.sum_squares(cvx_x)
@@ -357,11 +349,7 @@ def PositiveSemidefinite(X):
     Returns:
         cvxpy PSD constraint
     """
-    try:
-        import cvxpy as cp
-    except ImportError:
-        raise ImportError("cvxpy required")
-
+    _require_cvxpy()
     return _to_cvx(X) >> 0
 
 

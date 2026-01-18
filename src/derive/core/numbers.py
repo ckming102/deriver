@@ -9,11 +9,19 @@ Everything is automatically a rational complex number unless you specify decimal
 then it is arbitrary precision. Other approximation methods available when specified.
 """
 
+import re
 from contextlib import contextmanager
 from fractions import Fraction
 from typing import Any, Optional, Generator
+
 import sympy as sp
-from sympy import Rational, Integer, Float, nsimplify
+from sympy import Rational, Integer, Float, nsimplify, Symbol
+from sympy.parsing.sympy_parser import (
+    parse_expr,
+    standard_transformations,
+    implicit_multiplication_application,
+    convert_xor,
+)
 
 
 # Global state for exact mode
@@ -64,7 +72,7 @@ def rationalize(value: Any, tolerance: float = 1e-10) -> Any:
             result = nsimplify(value, rational=True, tolerance=tolerance)
             if isinstance(result, (Rational, Integer)):
                 return result
-        except:
+        except (TypeError, ValueError):
             pass
 
         return Float(value)
@@ -362,15 +370,6 @@ def expr(s: str, local_dict: Optional[dict] = None) -> Any:
         >>> expr("x/3 + y/2")
         x/3 + y/2
     """
-    import re
-    from sympy.parsing.sympy_parser import (
-        parse_expr,
-        standard_transformations,
-        implicit_multiplication_application,
-        convert_xor,
-    )
-    from sympy import Symbol
-
     # Default transformations include converting ^ to **
     transformations = standard_transformations + (
         implicit_multiplication_application,

@@ -6,8 +6,34 @@ LaTeX conversion, and pretty printing.
 """
 
 from typing import Any, Optional
+
 from sympy import latex, pretty, Symbol
 from sympy.printing.pretty.pretty import PrettyPrinter
+
+# Optional dependencies for rich terminal output
+try:
+    from rich.console import Console
+    from rich.text import Text
+    from rich.panel import Panel
+    from rich.table import Table
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+    Console = None
+    Text = None
+    Panel = None
+    Table = None
+
+# Optional dependencies for IPython/Jupyter
+try:
+    from IPython import get_ipython
+    from IPython.display import display, Math
+    IPYTHON_AVAILABLE = True
+except ImportError:
+    IPYTHON_AVAILABLE = False
+    get_ipython = None
+    display = None
+    Math = None
 
 
 def TeXForm(expr: Any) -> str:
@@ -80,10 +106,7 @@ def RichPrint(*args: Any, style: Optional[str] = None) -> None:
     Examples:
         >>> RichPrint(expr, style="bold green")
     """
-    try:
-        from rich.console import Console
-        from rich.text import Text
-
+    if RICH_AVAILABLE:
         console = Console()
         for arg in args:
             text = str(arg)
@@ -91,7 +114,7 @@ def RichPrint(*args: Any, style: Optional[str] = None) -> None:
                 console.print(text, style=style)
             else:
                 console.print(text)
-    except ImportError:
+    else:
         # Fallback to regular print
         for arg in args:
             print(arg)
@@ -104,14 +127,11 @@ def RichLatex(expr: Any) -> None:
     Args:
         expr: Expression to print
     """
-    try:
-        from rich.console import Console
-        from rich.panel import Panel
-
+    if RICH_AVAILABLE:
         console = Console()
         latex_str = TeXForm(expr)
         console.print(Panel(latex_str, title="LaTeX", border_style="blue"))
-    except ImportError:
+    else:
         print(f"LaTeX: {TeXForm(expr)}")
 
 
@@ -123,10 +143,7 @@ def TableForm(data: Any, headers: Optional[list] = None) -> None:
         data: 2D list or matrix to display
         headers: Optional column headers
     """
-    try:
-        from rich.console import Console
-        from rich.table import Table
-
+    if RICH_AVAILABLE:
         console = Console()
         table = Table()
 
@@ -149,7 +166,7 @@ def TableForm(data: Any, headers: Optional[list] = None) -> None:
                 table.add_row(str(row))
 
         console.print(table)
-    except ImportError:
+    else:
         # Fallback
         if headers:
             print('\t'.join(str(h) for h in headers))
@@ -182,16 +199,11 @@ def show(expr: Any, mode: str = "auto") -> None:
         print(expr)
     else:  # auto
         # Try to detect environment
-        try:
-            # Check if in IPython/Jupyter
-            from IPython import get_ipython
+        if IPYTHON_AVAILABLE:
             ipython = get_ipython()
             if ipython is not None:
-                from IPython.display import display, Math
                 display(Math(TeXForm(expr)))
                 return
-        except (ImportError, NameError):
-            pass
 
         # Terminal output with pretty printing
         print(PrettyForm(expr))

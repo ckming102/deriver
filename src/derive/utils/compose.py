@@ -5,8 +5,13 @@ Provides pipe-style operations and function composition for
 natural chaining of transformations on symbolic expressions.
 """
 
-from typing import Any, Callable, TypeVar, Union, List
 from functools import reduce
+from typing import Any, Callable, TypeVar, Union, List
+
+from sympy import simplify as sympy_simplify
+from sympy import expand as sympy_expand
+from sympy import factor as sympy_factor
+from sympy import collect as sympy_collect
 
 T = TypeVar('T')
 R = TypeVar('R')
@@ -234,23 +239,19 @@ class Chainable:
 
     def simplify(self) -> Any:
         """Simplify the expression."""
-        from sympy import simplify
-        return simplify(self)
+        return sympy_simplify(self)
 
     def expand(self) -> Any:
         """Expand the expression."""
-        from sympy import expand
-        return expand(self)
+        return sympy_expand(self)
 
     def factor(self) -> Any:
         """Factor the expression."""
-        from sympy import factor
-        return factor(self)
+        return sympy_factor(self)
 
     def collect(self, *syms: Any) -> Any:
         """Collect terms."""
-        from sympy import collect
-        return collect(self, *syms)
+        return sympy_collect(self, *syms)
 
 
 def Nest(f: Callable, x: Any, n: int) -> Any:
@@ -364,10 +365,9 @@ def FixedPoint(f: Callable, x: Any, max_iter: int = 100, tol: float = None) -> A
             return current
         # For symbolic expressions, try to simplify comparison
         try:
-            from sympy import simplify
-            if simplify(next_val - current) == 0:
+            if sympy_simplify(next_val - current) == 0:
                 return current
-        except:
+        except (TypeError, ValueError, AttributeError):
             pass
         current = next_val
     return current
@@ -410,10 +410,9 @@ def FixedPointList(f: Callable, x: Any, max_iter: int = 100, tol: float = None) 
         elif next_val == current:
             return result
         try:
-            from sympy import simplify
-            if simplify(next_val - current) == 0:
+            if sympy_simplify(next_val - current) == 0:
                 return result
-        except:
+        except (TypeError, ValueError, AttributeError):
             pass
         current = next_val
     return result

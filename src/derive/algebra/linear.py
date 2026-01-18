@@ -5,11 +5,19 @@ Provides linear algebra functions.
 """
 
 from typing import Any, List, Optional
+
 import sympy as sp
 from sympy import Matrix, eye, zeros, diag, Symbol
 
+from derive.utils.functional import matrix_method
+
 # Re-export Matrix
 Matrix = Matrix
+
+
+def _ensure_matrix(m: Any) -> Matrix:
+    """Convert input to Matrix if not already."""
+    return m if isinstance(m, Matrix) else sp.Matrix(m)
 
 
 def Dot(*args: Any) -> Any:
@@ -52,9 +60,7 @@ def Transpose(m: Any) -> Any:
     Returns:
         Transposed matrix
     """
-    if isinstance(m, Matrix):
-        return m.T
-    return sp.transpose(m)
+    return _ensure_matrix(m).T
 
 
 def Inverse(m: Any) -> Any:
@@ -67,24 +73,20 @@ def Inverse(m: Any) -> Any:
     Returns:
         Inverse matrix
     """
-    if isinstance(m, Matrix):
-        return m.inv()
-    return m**(-1)
+    return _ensure_matrix(m).inv()
 
 
-def Det(m: Any) -> Any:
-    """
-    Matrix determinant.
+# Use factory pattern for simple matrix operations
+Det = matrix_method('det')
+Det.__doc__ = """
+Matrix determinant.
 
-    Args:
-        m: Matrix
+Args:
+    m: Matrix
 
-    Returns:
-        Determinant
-    """
-    if isinstance(m, Matrix):
-        return m.det()
-    return sp.det(m)
+Returns:
+    Determinant
+"""
 
 
 def Eigenvalues(m: Any) -> dict:
@@ -101,9 +103,7 @@ def Eigenvalues(m: Any) -> dict:
         >>> Eigenvalues(Matrix([[1, 2], [2, 1]]))
         {-1: 1, 3: 1}
     """
-    if isinstance(m, Matrix):
-        return m.eigenvals()
-    return sp.Matrix(m).eigenvals()
+    return _ensure_matrix(m).eigenvals()
 
 
 def Eigenvectors(m: Any) -> List:
@@ -116,9 +116,7 @@ def Eigenvectors(m: Any) -> List:
     Returns:
         List of (eigenvalue, multiplicity, [eigenvectors])
     """
-    if isinstance(m, Matrix):
-        return m.eigenvects()
-    return sp.Matrix(m).eigenvects()
+    return _ensure_matrix(m).eigenvects()
 
 
 def IdentityMatrix(n: int) -> Matrix:
@@ -163,63 +161,55 @@ def ZeroMatrix(m: int, n: Optional[int] = None) -> Matrix:
     return zeros(m, n)
 
 
-def Tr(m: Any) -> Any:
-    """
-    Trace of a matrix.
+# Use factory pattern for trace and rank
+Tr = matrix_method('trace')
+Tr.__doc__ = """
+Trace of a matrix.
 
-    Tr[m] - sum of diagonal elements
+Tr[m] - sum of diagonal elements
 
-    Args:
-        m: Matrix
+Args:
+    m: Matrix
 
-    Returns:
-        Trace
+Returns:
+    Trace
 
-    Examples:
-        >>> Tr(Matrix([[1, 2], [3, 4]]))
-        5
-    """
-    if isinstance(m, Matrix):
-        return m.trace()
-    return sp.Matrix(m).trace()
+Examples:
+    >>> Tr(Matrix([[1, 2], [3, 4]]))
+    5
+"""
 
 
-def MatrixRank(m: Any) -> int:
-    """
-    Rank of a matrix.
+MatrixRank = matrix_method('rank')
+MatrixRank.__doc__ = """
+Rank of a matrix.
 
-    Args:
-        m: Matrix
+Args:
+    m: Matrix
 
-    Returns:
-        Rank
+Returns:
+    Rank
 
-    Examples:
-        >>> MatrixRank(Matrix([[1, 2], [2, 4]]))
-        1
-    """
-    if isinstance(m, Matrix):
-        return m.rank()
-    return sp.Matrix(m).rank()
+Examples:
+    >>> MatrixRank(Matrix([[1, 2], [2, 4]]))
+    1
+"""
 
 
-def NullSpace(m: Any) -> List[Matrix]:
-    """
-    Null space (kernel) of a matrix.
+NullSpace = matrix_method('nullspace')
+NullSpace.__doc__ = """
+Null space (kernel) of a matrix.
 
-    Args:
-        m: Matrix
+Args:
+    m: Matrix
 
-    Returns:
-        List of basis vectors for the null space
+Returns:
+    List of basis vectors for the null space
 
-    Examples:
-        >>> NullSpace(Matrix([[1, 2], [2, 4]]))
-        [Matrix([[-2], [1]])]
-    """
-    if isinstance(m, Matrix):
-        return m.nullspace()
-    return sp.Matrix(m).nullspace()
+Examples:
+    >>> NullSpace(Matrix([[1, 2], [2, 4]]))
+    [Matrix([[-2], [1]])]
+"""
 
 
 def RowReduce(m: Any) -> Matrix:
@@ -235,9 +225,7 @@ def RowReduce(m: Any) -> Matrix:
     Examples:
         >>> RowReduce(Matrix([[1, 2, 3], [4, 5, 6]]))
     """
-    if isinstance(m, Matrix):
-        return m.rref()[0]
-    return sp.Matrix(m).rref()[0]
+    return _ensure_matrix(m).rref()[0]
 
 
 def ConjugateTranspose(m: Any) -> Matrix:
@@ -253,27 +241,22 @@ def ConjugateTranspose(m: Any) -> Matrix:
     Examples:
         >>> ConjugateTranspose(Matrix([[1, I], [2, 3]]))
     """
-    if isinstance(m, Matrix):
-        return m.H
-    return sp.Matrix(m).H
+    return _ensure_matrix(m).H
 
 
-def MatrixExp(m: Any) -> Matrix:
-    """
-    Matrix exponential exp(m).
+MatrixExp = matrix_method('exp')
+MatrixExp.__doc__ = """
+Matrix exponential exp(m).
 
-    Args:
-        m: Matrix
+Args:
+    m: Matrix
 
-    Returns:
-        Matrix exponential
+Returns:
+    Matrix exponential
 
-    Examples:
-        >>> MatrixExp(Matrix([[0, 1], [-1, 0]]))  # Rotation matrix
-    """
-    if isinstance(m, Matrix):
-        return m.exp()
-    return sp.Matrix(m).exp()
+Examples:
+    >>> MatrixExp(Matrix([[0, 1], [-1, 0]]))  # Rotation matrix
+"""
 
 
 def CharacteristicPolynomial(m: Any, x: Optional[Symbol] = None) -> Any:
@@ -293,9 +276,7 @@ def CharacteristicPolynomial(m: Any, x: Optional[Symbol] = None) -> Any:
     """
     if x is None:
         x = sp.Symbol('x')
-    if isinstance(m, Matrix):
-        return m.charpoly(x).as_expr()
-    return sp.Matrix(m).charpoly(x).as_expr()
+    return _ensure_matrix(m).charpoly(x).as_expr()
 
 
 __all__ = [

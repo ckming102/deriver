@@ -4,13 +4,14 @@ transforms.py - Integral Transforms
 Provides Fourier, Laplace, and related integral transforms.
 """
 
+from typing import Any, Optional, Tuple
+
 import sympy as sp
 from sympy import (
     fourier_transform, inverse_fourier_transform,
     laplace_transform, inverse_laplace_transform,
-    Symbol, oo, exp, I, pi, sqrt,
+    Symbol, oo, exp, I, pi, sqrt, Integral,
 )
-from typing import Any, Optional, Tuple
 
 
 def FourierTransform(expr: Any, t: Symbol, omega: Symbol, **kwargs) -> Any:
@@ -130,8 +131,6 @@ def Convolve(f: Any, g: Any, t: Symbol, tau: Optional[Symbol] = None) -> Any:
     """
     if tau is None:
         tau = Symbol('tau')
-
-    from sympy import Integral, oo
 
     # Substitute t -> tau in f, and t -> (t - tau) in g
     f_sub = f.subs(t, tau)
