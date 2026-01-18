@@ -2,12 +2,28 @@
 numeric.py - Numerical ODE Solver.
 
 Provides NDSolve for numerical differential equation solving.
+
+Args:
+    ode_func: Function f(t, y) returning dy/dt, or symbolic expression.
+    y0: Initial condition y(t0).
+    var_range: (var, t0, tf) tuple specifying integration range.
+
+Returns:
+    InterpolatingFunction-like object with .t and .y attributes.
+
+Internal Refs:
+    Uses derive.core.math_api for NumPy/SciPy operations.
 """
 
 from typing import Any, Callable, Tuple, Union
-import numpy as np
-import sympy as sp
-from scipy.integrate import solve_ivp
+
+from derive.core.math_api import (
+    np, sp,
+    np_atleast_1d,
+    sym_lambdify as lambdify,
+    Symbol,
+    solve_ivp,
+)
 
 
 def NDSolve(
@@ -62,16 +78,16 @@ def NDSolve(
             free_syms = list(ode_func.free_symbols)
             if len(free_syms) == 2:
                 # Assume (t, y) format
-                t_sym = var if isinstance(var, sp.Symbol) else sp.Symbol(str(var))
+                t_sym = var if isinstance(var, Symbol) else Symbol(str(var))
                 y_sym = [s for s in free_syms if s != t_sym][0] if len(free_syms) > 1 else free_syms[0]
-                f = sp.lambdify((t_sym, y_sym), ode_func, modules=['numpy'])
+                f = lambdify((t_sym, y_sym), ode_func, modules=['numpy'])
                 ode_func = lambda t, y: f(t, y)
             else:
-                f = sp.lambdify(free_syms[0], ode_func, modules=['numpy'])
+                f = lambdify(free_syms[0], ode_func, modules=['numpy'])
                 ode_func = lambda t, y: f(y)
 
         # Ensure y0 is array-like for solve_ivp
-        y0_arr = np.atleast_1d(y0)
+        y0_arr = np_atleast_1d(y0)
 
         # Map method names to scipy equivalents
         method_map = {

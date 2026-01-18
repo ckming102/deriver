@@ -3,12 +3,20 @@ display.py - Output and Display Functions.
 
 Provides functions for output formatting including rich terminal output,
 LaTeX conversion, and pretty printing.
+
+Args:
+    expr: Expression to display/convert.
+
+Returns:
+    String representation or None (for print functions).
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, Optional
 
-from sympy import latex, pretty, Symbol
-from sympy.printing.pretty.pretty import PrettyPrinter
+from derive.core.math_api import latex, pretty, Symbol, PrettyPrinter
 
 # Optional dependencies for rich terminal output
 try:

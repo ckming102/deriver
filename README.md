@@ -187,11 +187,12 @@ The `examples/` directory contains interactive Marimo notebooks demonstrating co
 | Notebook | Description | GitHub | Rendered |
 |----------|-------------|--------|----------|
 | `derive_marimo.py` | Intro notebook for core calculus/plotting | [IPYNB](examples/rendered/derive_marimo.ipynb) | [HTML](examples/rendered/derive_marimo.html) |
-| `linearized_gravity.py` | Metric perturbations and gravitational waves | [IPYNB](examples/rendered/linearized_gravity.ipynb) | [HTML](examples/rendered/linearized_gravity.html) |
-| `quantum_mechanics.py` | Harmonic oscillator, hydrogen atom, perturbation theory | [IPYNB](examples/rendered/quantum_mechanics.ipynb) | [HTML](examples/rendered/quantum_mechanics.html) |
+| `symbolic_regression.py` | Discover formulas from data with FindFormula/PySR | [IPYNB](examples/rendered/symbolic_regression.ipynb) | [HTML](examples/rendered/symbolic_regression.html) |
 | `classical_mechanics.py` | Lagrangian/Hamiltonian mechanics, Noether's theorem | [IPYNB](examples/rendered/classical_mechanics.ipynb) | [HTML](examples/rendered/classical_mechanics.html) |
+| `quantum_mechanics.py` | Harmonic oscillator, hydrogen atom, perturbation theory | [IPYNB](examples/rendered/quantum_mechanics.ipynb) | [HTML](examples/rendered/quantum_mechanics.html) |
 | `electromagnetism.py` | Maxwell equations, gauge theory, EM waves | [IPYNB](examples/rendered/electromagnetism.ipynb) | [HTML](examples/rendered/electromagnetism.html) |
 | `differential_geometry.py` | Manifolds, curvature tensors, connections | [IPYNB](examples/rendered/differential_geometry.ipynb) | [HTML](examples/rendered/differential_geometry.html) |
+| `linearized_gravity.py` | Metric perturbations and gravitational waves | [IPYNB](examples/rendered/linearized_gravity.ipynb) | [HTML](examples/rendered/linearized_gravity.html) |
 | `renormalization_group.py` | CLT as RG fixed point, universality, beta functions | [IPYNB](examples/rendered/renormalization_group.ipynb) | [HTML](examples/rendered/renormalization_group.html) |
 
 The RG notebook demonstrates how the Central Limit Theorem emerges as a renormalization group fixed point, inspired by [The Simplest Renormalization Group](https://dinunno.substack.com/p/the-simplest-renormalization-group).

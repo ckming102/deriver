@@ -3,13 +3,22 @@ functional.py - Functional Programming Utilities
 
 Provides higher-order functions, decorators, and functional patterns
 for cleaner, more composable code.
+
+Args:
+    Various depending on function.
+
+Returns:
+    Various depending on function.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
+import inspect
 from functools import wraps, reduce
 from typing import Any, Callable, TypeVar, List, Tuple, Optional, Union
 
-import sympy as sp
-from sympy import Matrix, lambdify
+from derive.core.math_api import sp, Matrix, lambdify
 
 T = TypeVar('T')
 R = TypeVar('R')
@@ -125,6 +134,7 @@ def apply_to_ranges(
         >>> apply_to_ranges(x*y, lambda e, r: integrate(e, r), (x, 0, 1), (y, 0, 1))
         1/4
     """
+    # NOTE: Deferred import to prevent circular dependency
     from derive.utils.validation import validate_tuple
 
     result = expr
@@ -153,7 +163,6 @@ def curry(func: Callable) -> Callable:
         >>> add(1, 2)(3)
         6
     """
-    import inspect
     sig = inspect.signature(func)
     num_params = len([
         p for p in sig.parameters.values()

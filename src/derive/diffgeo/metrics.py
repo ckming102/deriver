@@ -5,20 +5,33 @@ Provides Metric and Tensor classes along with predefined metrics
 like Minkowski, Schwarzschild, FLRW, and spherical coordinates.
 
 Exploits tensor symmetries for optimized computation:
-- Christoffel symbols: Γ^ρ_μν = Γ^ρ_νμ (symmetric in lower indices)
-- Metric: g_μν = g_νμ (symmetric)
+- Christoffel symbols: Gamma^rho_mu_nu = Gamma^rho_nu_mu (symmetric in lower indices)
+- Metric: g_mu_nu = g_nu_mu (symmetric)
+
+Args:
+    coords: List of coordinate symbols.
+    components: Matrix of metric components g_{mu nu}.
+
+Returns:
+    Metric object with methods for computing geometric quantities.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
+    Uses derive.calculus.D for differentiation.
+    Uses derive.algebra.Simplify for expression simplification.
 """
 
-import sympy as sp
-from sympy import (
+from typing import List, Tuple, Optional
+from itertools import product as iterprod, combinations
+
+from derive.core.math_api import (
+    sp,
     Symbol, symbols, Function, Matrix, Array,
     sin, cos, sqrt, Rational,
     tensorproduct, tensorcontraction,
     MutableDenseNDimArray, ImmutableDenseNDimArray,
     derive_by_array,
 )
-from typing import List, Tuple, Optional
-from itertools import product as iterprod, combinations
 
 # Use derive's own APIs for self-consistency
 from derive.calculus import D
