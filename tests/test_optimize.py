@@ -217,6 +217,26 @@ class TestSumQuad:
 class TestBoundsEnforcement:
     """Tests for bounds enforcement in optimization."""
 
+    def test_inline_optvar_bounds_not_dropped(self):
+        """Test that bounds work with inline OptVar (issue #15).
+
+        Regression test: WeakValueDictionary caused OptVar to be GC'd before
+        solve(), silently dropping bounds.
+        """
+        import gc
+
+        # Create problem with inline OptVar - no variable stores the OptVar
+        prob = Minimize(OptVar('x', bounds=(2, 10)))
+
+        # Force garbage collection to trigger the bug if present
+        gc.collect()
+
+        result = prob.solve()
+        assert prob.is_solved
+        # If bounds were applied, minimum is at lower bound (2)
+        # If bounds were dropped, this would be unbounded
+        assert abs(result - 2.0) < 1e-4
+
     def test_bounds_enforced_in_minimize(self):
         """Test that bounds are actually enforced during minimization."""
         x = OptVar('x', bounds=(2, 10))

@@ -10,7 +10,6 @@ Internal Refs:
     Uses cvxpy for optimization (specialized library, not abstracted).
 """
 
-import weakref
 from typing import Any, List, Optional, Union, Literal
 
 # cvxpy is a specialized optimization library, not abstracted through math_api
@@ -54,9 +53,11 @@ class OptVar:
         >>> w = OptVar('w', bounds=(0, 10))
     """
 
-    # Registry mapping cvxpy Variables to OptVars for bound collection.
-    # Uses WeakValueDictionary so OptVars can be garbage collected when no longer referenced.
-    _registry: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
+    # Registry mapping cvxpy Variable id -> OptVar for bound collection.
+    # Uses strong references to ensure OptVars stay alive as long as they're registered.
+    # Note: Can't use WeakKeyDictionary because cp.Variable overrides __eq__ to return
+    # constraints, breaking dict equality checks.
+    _registry: dict = {}
 
     def __init__(
         self,
@@ -90,7 +91,7 @@ class OptVar:
                 kwargs['boolean'] = True
 
             self._cvx_var = cp.Variable(**kwargs)
-            # Register for bound collection
+            # Register for bound collection (strong reference keeps OptVar alive)
             OptVar._registry[id(self._cvx_var)] = self
 
         return self._cvx_var
@@ -191,7 +192,7 @@ def _collect_optvars(obj, collected=None):
         if not any(v is obj for v in collected):
             collected.append(obj)
     elif CVXPY_AVAILABLE and isinstance(obj, cp.Variable):
-        # Look up the OptVar from the registry
+        # Look up the OptVar from the registry (keyed by id)
         optvar = OptVar._registry.get(id(obj))
         if optvar is not None and not any(v is optvar for v in collected):
             collected.append(optvar)
