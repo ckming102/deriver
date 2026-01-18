@@ -12,6 +12,7 @@ wheels/
 uv.lock
 
 # Nix specific
+flake.nix
 flake.lock
 shell.nix
 
