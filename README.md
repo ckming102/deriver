@@ -14,6 +14,7 @@ A powerful symbolic mathematics library for Python.
 - **Custom Types**: Define your own types (Quaternion, Vector3D included)
 - **Probability**: Distribution functions and statistics
 - **Optimization**: Convex optimization via cvxpy (optional)
+- **Symbolic Regression**: Discover formulas from data via PySR
 - **Plotting**: Publication-quality mathematical plots
 - **Composable API**: Pipe operations and functional composition
 
@@ -238,14 +239,15 @@ MIT License
 
 Thanks to the open-source libraries Derive is built on:
 
-- [SymPy](https://www.sympy.org/)
-- [NumPy](https://numpy.org/)
-- [SciPy](https://scipy.org/)
-- [Matplotlib](https://matplotlib.org/)
-- [Polars](https://www.pola.rs/)
-- [mpmath](https://mpmath.org/)
-- [Rich](https://rich.readthedocs.io/)
-- [Marimo](https://marimo.io/)
 - [CVXPY](https://www.cvxpy.org/) (optional, for optimization features)
+- [Marimo](https://marimo.io/)
+- [Matplotlib](https://matplotlib.org/)
+- [mpmath](https://mpmath.org/)
+- [NumPy](https://numpy.org/)
+- [Polars](https://www.pola.rs/)
+- [PySR](https://astroautomata.com/PySR/) (symbolic regression)
+- [Rich](https://rich.readthedocs.io/)
+- [SciPy](https://scipy.org/)
+- [SymPy](https://www.sympy.org/)
 
 **Note**: This project is the result of a collaboration between Brandon DiNunno, Tom Mainiero, and Claude Code. Any likeness to proprietary APIs is strictly coincidental.
