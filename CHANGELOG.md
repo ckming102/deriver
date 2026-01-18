@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Generating code for numerical simulations (based on arXiv:1608.04408)
 
 ### Changed
-- **BREAKING**: All modules now import from `derive.core.math_api` instead of directly from sympy/numpy/scipy
+- **BREAKING**: All modules now import from `derive.core.math_api` instead of directly from sympy/numpy/scipy/mpmath
   - This enforces the centralized math library abstraction layer
   - External library usage is now fully encapsulated in `math_api.py`
   - Enables future library swapping without changing consumer code
@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comparison operators: `Eq`, `Ne`, `Lt`, `Le`, `Gt`, `Ge`, `Max`, `Min`
   - Special functions: `gegenbauer`, `jacobi`, `Ynm`, `beta`, `li`
   - Array operations: `permutedims`
+  - Arbitrary precision: `mpmath_mpf`, `mpmath_mpi`, `mpmath_mp`, `GetMpmath()`, `IsMpmathAvailable()`
 
 ### Fixed
 - Removed redundant mid-function import in `discretization/stencils.py`

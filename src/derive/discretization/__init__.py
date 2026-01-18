@@ -10,6 +10,8 @@ from derive.discretization.stencils import (
     Discretizer,
     ToStencil,
     StencilCodeGen,
+    FiniteDiffWeights,
+    Stencil,
 )
 
 __all__ = [
@@ -17,4 +19,6 @@ __all__ = [
     'Discretizer',
     'ToStencil',
     'StencilCodeGen',
+    'FiniteDiffWeights',
+    'Stencil',
 ]

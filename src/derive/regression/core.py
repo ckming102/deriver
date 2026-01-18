@@ -13,7 +13,7 @@ Returns:
 
 Internal Refs:
     Uses derive.core.math_api for NumPy/SymPy operations.
-    Uses PySR for symbolic regression (specialized library, not abstracted).
+    Uses derive.core.math_api.GetPySRRegressor for PySR symbolic regression.
 """
 
 from typing import Any, Dict, List, Optional, Union, Literal
@@ -25,16 +25,9 @@ from derive.core.math_api import (
     np_arange,
     Symbol,
     nan,
+    GetPySRRegressor,
+    IsPySRAvailable,
 )
-
-# PySR is a specialized symbolic regression library, not abstracted through math_api
-# NOTE: Deferred import - pysr is a specialized optional dependency
-try:
-    from pysr import PySRRegressor
-    PYSR_AVAILABLE = True
-except ImportError:
-    PySRRegressor = None
-    PYSR_AVAILABLE = False
 
 
 # Map symbolic function names to PySR operators
@@ -135,11 +128,16 @@ def _data_to_arrays(
 
 
 def _pysr_to_sympy(
-    model: "PySRRegressor",
+    model: Any,
     feature_names: List[Symbol],
     n: int = 1
 ) -> Union[Any, List[Any]]:
-    """Convert PySR model results to SymPy expressions."""
+    """
+    Convert PySR model results to SymPy expressions.
+
+    Internal Refs:
+        Uses derive.core.math_api.Symbol for expression substitution.
+    """
     equations = model.equations_
 
     if equations is None or len(equations) == 0:
@@ -260,8 +258,11 @@ def FindFormula(
     # Allow user overrides
     model_kwargs.update(kwargs)
 
+    # Get PySR regressor from math_api (handles import error if not installed)
+    _PySRRegressor = GetPySRRegressor()
+
     # Create and fit model
-    model = PySRRegressor(**model_kwargs)
+    model = _PySRRegressor(**model_kwargs)
     model.fit(X, y)
 
     # Get sympy expressions

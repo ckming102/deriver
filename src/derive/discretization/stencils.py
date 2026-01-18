@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from derive.core.math_api import (
     Symbol, symbols, Function, Expr, Derivative, Rational,
-    latex, sympify,
+    latex, sympify, sp, finite_diff_weights,
 )
 
 
@@ -139,6 +139,89 @@ def Discretize(expr: Expr,
         Uses SymPy's Derivative.as_finite_difference for stencil computation.
     """
     return Discretizer(step_map)(expr)
+
+
+def FiniteDiffWeights(deriv_order: int, accuracy: int = 2,
+                       point: Expr = 0) -> Tuple[List[int], List[Rational]]:
+    """
+    Compute finite difference stencil weights using Taylor series expansion.
+
+    Automatically determines the optimal stencil points and weights for
+    approximating a derivative of given order to specified accuracy.
+
+    Args:
+        deriv_order: Order of derivative (1 for first, 2 for second, etc.)
+        accuracy: Order of accuracy (2, 4, 6, ...). Higher = more points.
+        point: Point at which to evaluate (0 for centered, use offset for one-sided)
+
+    Returns:
+        Tuple of (offsets, weights) where offsets are integer grid offsets
+        and weights are the coefficients.
+
+    Examples:
+        >>> # Second derivative, 2nd order accuracy (standard 3-point stencil)
+        >>> offsets, weights = FiniteDiffWeights(2, accuracy=2)
+        >>> offsets
+        [-1, 0, 1]
+        >>> weights
+        [1, -2, 1]
+
+        >>> # First derivative, 4th order accuracy (5-point stencil)
+        >>> offsets, weights = FiniteDiffWeights(1, accuracy=4)
+        >>> offsets
+        [-2, -1, 0, 1, 2]
+        >>> weights
+        [1/12, -2/3, 0, 2/3, -1/12]
+
+    Internal Refs:
+        Uses sympy.finite_diff_weights for Taylor series computation.
+    """
+    # Number of points needed for given accuracy
+    n_points = deriv_order + accuracy - 1 + (deriv_order % 2)
+    if n_points % 2 == 0:
+        n_points += 1  # Ensure odd for symmetric stencil
+
+    half = n_points // 2
+    offsets = list(range(-half, half + 1))
+
+    # Get weights from SymPy's finite_diff_weights
+    # Returns nested list: weights[deriv_order][-1] gives final weights for that order
+    weights_table = finite_diff_weights(deriv_order, offsets, point)
+
+    # Extract weights for the requested derivative order (last row has full weights)
+    raw_weights = weights_table[deriv_order][-1]
+
+    # Convert to Rationals
+    weights = [Rational(w) for w in raw_weights]
+
+    return offsets, weights
+
+
+def Stencil(deriv_order: int, accuracy: int = 2) -> Dict[int, Rational]:
+    """
+    Generate a finite difference stencil as a dictionary.
+
+    Convenience function that returns stencil as {offset: weight} dict.
+
+    Args:
+        deriv_order: Order of derivative
+        accuracy: Order of accuracy (default 2)
+
+    Returns:
+        Dictionary mapping grid offsets to weights.
+
+    Examples:
+        >>> Stencil(2)  # Second derivative, 2nd order
+        {-1: 1, 0: -2, 1: 1}
+
+        >>> Stencil(1, accuracy=4)  # First derivative, 4th order
+        {-2: 1/12, -1: -2/3, 0: 0, 1: 2/3, 2: -1/12}
+
+    Internal Refs:
+        Uses FiniteDiffWeights for computation.
+    """
+    offsets, weights = FiniteDiffWeights(deriv_order, accuracy)
+    return dict(zip(offsets, weights))
 
 
 def _generate_stencil_points(center: Symbol, step: Symbol,
@@ -433,4 +516,6 @@ __all__ = [
     'Discretizer',
     'ToStencil',
     'StencilCodeGen',
+    'FiniteDiffWeights',
+    'Stencil',
 ]

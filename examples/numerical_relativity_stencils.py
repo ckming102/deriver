@@ -26,12 +26,14 @@ def _():
     )
     from derive.calculus import VariationalDerivative, EulerLagrangeEquation
     from derive.discretization import Discretize, ToStencil, StencilCodeGen
+    from derive.diffgeo import Metric, minkowski_metric
     return (
         D,
         Discretize,
         EulerLagrangeEquation,
         Expand,
         Function,
+        Metric,
         Pipe,
         R,
         Rational,
@@ -42,6 +44,7 @@ def _():
         TeXForm,
         ToStencil,
         VariationalDerivative,
+        minkowski_metric,
         mo,
         symbols,
     )
@@ -446,23 +449,379 @@ def _(D, Discretize, Function, R, Simplify, Symbol, mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ## 9. Multi-Dimensional Stencils: The 3D Laplacian
+
+    Numerical relativity simulations operate in 3D. The spatial Laplacian
+    appears in the Hamiltonian constraint and evolution equations:
+
+    $$\nabla^2 \phi = \frac{\partial^2\phi}{\partial x^2} + \frac{\partial^2\phi}{\partial y^2} + \frac{\partial^2\phi}{\partial z^2}$$
+
+    Each term uses the standard second derivative stencil.
+    """)
+    return
+
+
+@app.cell
+def _(D, Discretize, Function, Simplify, StencilCodeGen, mo, symbols):
+    # 3D Laplacian
+    x_3d, y_3d, z_3d = symbols('x y z')
+    hx_3d, hy_3d, hz_3d = symbols('h_x h_y h_z')
+    phi_3d = Function('phi')(x_3d, y_3d, z_3d)
+
+    # Laplacian in 3D
+    laplacian_3d = D(phi_3d, (x_3d, 2)) + D(phi_3d, (y_3d, 2)) + D(phi_3d, (z_3d, 2))
+
+    # Discretize with uniform spacing h
+    h_uniform = symbols('h')
+    step_map_3d = {
+        x_3d: ([x_3d - h_uniform, x_3d, x_3d + h_uniform], h_uniform),
+        y_3d: ([y_3d - h_uniform, y_3d, y_3d + h_uniform], h_uniform),
+        z_3d: ([z_3d - h_uniform, z_3d, z_3d + h_uniform], h_uniform),
+    }
+    laplacian_discrete = Discretize(laplacian_3d, step_map_3d)
+
+    # Generate C code for the stencil
+    c_laplacian = StencilCodeGen(
+        Discretize(D(phi_3d, (x_3d, 2)), {x_3d: ([x_3d - h_uniform, x_3d, x_3d + h_uniform], h_uniform)}),
+        language='c', array_name='phi', index_var='i', spacing_name='dx'
+    )
+
+    mo.md(f"""
+    **3D Laplacian Stencil:**
+
+    Continuous: $\\nabla^2\\phi = {laplacian_3d}$
+
+    Discretized (uniform grid $h$): ${Simplify(laplacian_discrete)}$
+
+    This is the classic 7-point stencil used in numerical relativity codes.
+
+    **C code for one dimension** (repeat for j, k indices):
+    ```c
+    d2phi_dx2 = {c_laplacian};
+    ```
+    """)
+    return (
+        c_laplacian, h_uniform, hx_3d, hy_3d, hz_3d,
+        laplacian_3d, laplacian_discrete, phi_3d,
+        step_map_3d, x_3d, y_3d, z_3d,
+    )
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 10. Stencil Accuracy: 2nd vs 4th vs 6th Order
+
+    Higher-order stencils use more points but converge faster.
+    The truncation error scales as $O(h^n)$ where $n$ is the accuracy order.
+
+    | Order | Points | Error Scaling | Use Case |
+    |-------|--------|---------------|----------|
+    | 2nd   | 3      | $O(h^2)$      | Simple problems, quick tests |
+    | 4th   | 5      | $O(h^4)$      | Production simulations |
+    | 6th   | 7      | $O(h^6)$      | High-precision work |
+    | 8th   | 9      | $O(h^8)$      | Spectral-like accuracy |
+    """)
+    return
+
+
+@app.cell
+def _(D, Function, Simplify, Symbol, ToStencil, mo):
+    # Compare stencil orders for second derivative
+    x_ord = Symbol('x')
+    h_ord = Symbol('h')
+    f_ord = Function('f')(x_ord)
+
+    d2f = D(f_ord, (x_ord, 2))
+
+    stencil_2nd = ToStencil(d2f, {x_ord: h_ord}, width=3)
+    stencil_4th = ToStencil(d2f, {x_ord: h_ord}, width=5)
+    stencil_6th = ToStencil(d2f, {x_ord: h_ord}, width=7)
+
+    mo.md(f"""
+    **Second Derivative Stencils by Order:**
+
+    **2nd order (3-point):**
+    ${Simplify(stencil_2nd)}$
+
+    **4th order (5-point):**
+    ${Simplify(stencil_4th)}$
+
+    **6th order (7-point):**
+    ${Simplify(stencil_6th)}$
+
+    Note how higher-order stencils have smaller coefficients on the outer points,
+    reducing numerical dispersion.
+    """)
+    return d2f, f_ord, h_ord, stencil_2nd, stencil_4th, stencil_6th, x_ord
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 11. Mixed Derivatives and Cross Terms
+
+    The BSSN formulation of general relativity includes mixed partial derivatives
+    like $\partial_x\partial_y\phi$. These require 2D stencils.
+    """)
+    return
+
+
+@app.cell
+def _(D, Discretize, Function, Simplify, mo, symbols):
+    # Mixed derivative
+    x_mix, y_mix = symbols('x y')
+    h_mix = symbols('h')
+    phi_mix = Function('phi')(x_mix, y_mix)
+
+    # Mixed partial derivative
+    d2_dxdy = D(D(phi_mix, x_mix), y_mix)
+
+    # 9-point stencil for mixed derivative
+    step_map_mix = {
+        x_mix: ([x_mix - h_mix, x_mix, x_mix + h_mix], h_mix),
+        y_mix: ([y_mix - h_mix, y_mix, y_mix + h_mix], h_mix),
+    }
+    mixed_stencil = Discretize(d2_dxdy, step_map_mix)
+
+    mo.md(f"""
+    **Mixed Partial Derivative:**
+
+    Continuous: $\\frac{{\\partial^2\\phi}}{{\\partial x\\partial y}}$
+
+    Discretized: ${Simplify(mixed_stencil)}$
+
+    This is the standard 4-corner stencil:
+    ```
+    (-1)-----(0)-----(+1)
+      |       |       |
+    (+1)    (0,0)   (+1)
+      |       |       |
+    (-1)-----(0)-----(+1)
+    ```
+    Only the four corners contribute (with alternating signs).
+    """)
+    return d2_dxdy, h_mix, mixed_stencil, phi_mix, step_map_mix, x_mix, y_mix
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 12. The ADM Evolution Equations
+
+    In numerical relativity, the ADM (Arnowitt-Deser-Misner) formalism evolves
+    the 3-metric $\gamma_{ij}$ and extrinsic curvature $K_{ij}$:
+
+    $$\partial_t \gamma_{ij} = -2\alpha K_{ij} + \mathcal{L}_\beta \gamma_{ij}$$
+
+    $$\partial_t K_{ij} = -D_i D_j \alpha + \alpha(R_{ij} + K K_{ij} - 2K_{ik}K^k{}_j) + \mathcal{L}_\beta K_{ij}$$
+
+    The spatial Ricci tensor $R_{ij}$ contains second derivatives of the metric,
+    which we discretize using the stencils developed above.
+    """)
+    return
+
+
+@app.cell
+def _(D, Discretize, Function, R, Simplify, StencilCodeGen, mo, symbols):
+    # Simplified ADM-like term: second derivative of metric component
+    x_adm, y_adm = symbols('x y')
+    h_adm = symbols('h')
+    gamma_xx = Function('gamma_xx')(x_adm, y_adm)
+
+    # Part of the Ricci tensor: d^2(gamma_xx)/dx^2
+    ricci_term = D(gamma_xx, (x_adm, 2))
+
+    # Discretize
+    step_adm = {x_adm: ([x_adm - h_adm, x_adm, x_adm + h_adm], h_adm)}
+    ricci_discrete = Discretize(ricci_term, step_adm)
+
+    # Generate code
+    ricci_code = StencilCodeGen(ricci_discrete, language='c',
+                                 array_name='gamma_xx', index_var='i', spacing_name='dx')
+
+    mo.md(f"""
+    **Ricci Tensor Component (simplified):**
+
+    One term in $R_{{xx}}$ involves: $\\frac{{\\partial^2 \\gamma_{{xx}}}}{{\\partial x^2}}$
+
+    Discretized: ${Simplify(ricci_discrete)}$
+
+    **C code:**
+    ```c
+    double d2gamma_dx2 = {ricci_code};
+    ```
+
+    The full Ricci tensor has many such terms for each metric component.
+    Derive automates the error-prone process of deriving and coding each stencil.
+    """)
+    return (
+        gamma_xx, h_adm, ricci_code, ricci_discrete, ricci_term,
+        step_adm, x_adm, y_adm,
+    )
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 13. Using the Metric Class for Tensor Calculus
+
+    Derive's `diffgeo` module provides a `Metric` class for full tensor calculus.
+    This computes Christoffel symbols, Riemann tensor, and Ricci tensor automatically.
+
+    For numerical relativity, these tensors contain the derivatives we need to discretize.
+    """)
+    return
+
+
+@app.cell
+def _(Metric, Simplify, Symbol, symbols):
+    # Define a general 2D metric (simplified example)
+    x_m, y_m = symbols('x y', real=True)
+
+    # Metric components as symbols (would be functions in full NR)
+    g_xx = Symbol('g_xx', positive=True)
+    g_yy = Symbol('g_yy', positive=True)
+
+    # Create a diagonal metric: ds^2 = g_xx dx^2 + g_yy dy^2
+    # Metric(coords, components)
+    metric_2d = Metric(
+        [x_m, y_m],
+        [[g_xx, 0],
+         [0, g_yy]]
+    )
+
+    # Christoffel symbols contain first derivatives of the metric
+    christoffels = metric_2d.christoffel_second_kind()
+
+    # Example: Gamma^x_xx = (1/2) g^xx * d(g_xx)/dx
+    Gamma_x_xx = Simplify(christoffels[0, 0, 0])
+
+    (metric_2d.g, Gamma_x_xx)
+    return Gamma_x_xx, christoffels, g_xx, g_yy, metric_2d, x_m, y_m
+
+
+@app.cell
+def _(D, Discretize, Function, Simplify, StencilCodeGen, mo, symbols):
+    # Now discretize a Christoffel-like term
+    # Gamma^i_jk involves d(g_jk)/dx^i, so we discretize metric derivatives
+    x_chr, y_chr = symbols('x y')
+    h_chr = symbols('h')
+
+    # Metric component as a function of position
+    g_xx_func = Function('g_xx')(x_chr, y_chr)
+
+    # The derivative that appears in Christoffel symbols
+    dg_dx = D(g_xx_func, x_chr)
+
+    # Discretize using central difference
+    step_chr = {x_chr: ([x_chr - h_chr, x_chr, x_chr + h_chr], h_chr)}
+    dg_discrete = Discretize(dg_dx, step_chr)
+
+    # Code for Christoffel computation
+    chr_code = StencilCodeGen(dg_discrete, language='c',
+                               array_name='g_xx', index_var='i', spacing_name='dx')
+
+    mo.md(f"""
+    **Discretizing Christoffel Symbol Terms:**
+
+    Christoffel symbols involve metric derivatives like $\\partial_x g_{{xx}}$
+
+    Discretized: ${Simplify(dg_discrete)}$
+
+    **C code:**
+    ```c
+    // dg_xx/dx for Christoffel computation
+    double dg_dx = {chr_code};
+
+    // Then Gamma^x_xx = 0.5 * g_xx_inv * dg_dx
+    double Gamma_x_xx = 0.5 * g_xx_inv * dg_dx;
+    ```
+
+    The full BSSN evolution uses these discretized Christoffels throughout.
+    """)
+    return chr_code, dg_discrete, dg_dx, g_xx_func, h_chr, step_chr, x_chr, y_chr
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 14. Kreiss-Oliger Dissipation
+
+    Numerical simulations often add artificial dissipation to control
+    high-frequency noise. The Kreiss-Oliger operator for 4th order schemes:
+
+    $$\epsilon (-1)^{r+1} h^{2r-1} D_+^r D_-^r \phi$$
+
+    where $D_+$ and $D_-$ are forward/backward difference operators.
+    For $r=2$ this gives a 5-point dissipation stencil.
+    """)
+    return
+
+
+@app.cell
+def _(D, Function, Simplify, Symbol, ToStencil, mo):
+    # Kreiss-Oliger dissipation (4th derivative for 4th order scheme)
+    x_ko = Symbol('x')
+    h_ko = Symbol('h')
+    eps = Symbol('epsilon')
+    phi_ko = Function('phi')(x_ko)
+
+    # Fourth derivative (appears in Kreiss-Oliger for 4th order methods)
+    d4_phi = D(phi_ko, (x_ko, 4))
+
+    # Discretize with 5-point stencil
+    ko_stencil = ToStencil(d4_phi, {x_ko: h_ko}, width=5)
+
+    mo.md(f"""
+    **Kreiss-Oliger Dissipation Term:**
+
+    Fourth derivative: $\\frac{{\\partial^4\\phi}}{{\\partial x^4}}$
+
+    Discretized: ${Simplify(ko_stencil)}$
+
+    Applied as: $\\phi \\leftarrow \\phi - \\epsilon \\cdot h^3 \\cdot (\\text{{stencil}})$
+
+    The coefficient $\\epsilon \\sim 0.1$ controls dissipation strength.
+    """)
+    return d4_phi, eps, h_ko, ko_stencil, phi_ko, x_ko
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ## Summary
 
-    This notebook demonstrated the complete pipeline from physics to simulation:
+    This notebook demonstrated the complete pipeline from theoretical physics
+    to production-ready numerical simulation code:
 
+    **Physics to Code Pipeline:**
     1. **Variational Calculus**: Derive equations of motion from Lagrangians
-    2. **Discretization**: Convert PDEs to finite difference form
-    3. **Code Generation**: Output simulation code in Python, C, or Fortran
+    2. **Discretization**: Convert PDEs to finite difference stencils
+    3. **Multi-dimensional**: Handle 3D Laplacians, mixed derivatives
+    4. **Code Generation**: Output C, Fortran, or Python for direct use
+
+    **Numerical Relativity Applications:**
+    - 3D Laplacian (7-point stencil) for constraint equations
+    - Mixed derivatives for BSSN formulation
+    - ADM evolution equations with Ricci tensor terms
+    - Metric class for Christoffel symbols and curvature tensors
+    - Kreiss-Oliger dissipation for numerical stability
+
+    **Accuracy Control:**
+    - 2nd order (3-point) to 8th order (9-point) stencils
+    - Error scaling from $O(h^2)$ to $O(h^8)$
 
     This workflow is directly applicable to numerical relativity codes like
     GRChombo (used in arXiv:1608.04408) for simulating inflation with
     inhomogeneous initial conditions.
 
-    ### Key Functions Used:
+    ### Key Functions:
     - `VariationalDerivative(L, field, coords)` - Euler-Lagrange equations
     - `Discretize(expr, step_map)` - Finite difference conversion
-    - `ToStencil(expr, spacing, width)` - Convenience function with auto stencil generation
-    - `StencilCodeGen(expr, language)` - Code generation
+    - `ToStencil(expr, spacing, width)` - Auto-generate stencil points
+    - `StencilCodeGen(expr, language)` - C/Fortran/Python code generation
+    - `Metric(components, coords)` - Tensor calculus with auto Christoffels
     - `Pipe(expr).then(...)` - Composable API for chaining operations
     """)
     return

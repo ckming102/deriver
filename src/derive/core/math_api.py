@@ -169,6 +169,9 @@ from sympy import (
     laplace_transform, inverse_laplace_transform,
 )
 
+# Finite differences
+from sympy import finite_diff_weights
+
 # =============================================================================
 # NumPy - Numerical Arrays
 # =============================================================================
@@ -246,6 +249,102 @@ from scipy import stats as scipy_stats
 # Specific functions
 from scipy.integrate import solve_ivp, quad as scipy_quad
 from scipy.optimize import fsolve as scipy_fsolve, minimize as scipy_minimize
+
+# =============================================================================
+# mpmath - Arbitrary Precision Arithmetic (Optional)
+# =============================================================================
+# NOTE: Deferred import - mpmath is an optional dependency
+try:
+    import mpmath as mpmath_module
+    from mpmath import mpf as mpmath_mpf, mpi as mpmath_mpi, mp as mpmath_mp
+    MPMATH_AVAILABLE = True
+except ImportError:
+    mpmath_module = None
+    mpmath_mpf = None
+    mpmath_mpi = None
+    mpmath_mp = None
+    MPMATH_AVAILABLE = False
+
+
+def GetMpmath():
+    """
+    Get the mpmath module.
+
+    Returns:
+        mpmath module
+
+    Raises:
+        ImportError: If mpmath is not installed
+
+    Internal Refs:
+        Uses mpmath for arbitrary precision arithmetic.
+    """
+    if not MPMATH_AVAILABLE:
+        raise ImportError(
+            "mpmath is required for arbitrary precision arithmetic. "
+            "Install with: pip install mpmath"
+        )
+    return mpmath_module
+
+
+def IsMpmathAvailable():
+    """
+    Check if mpmath is available.
+
+    Returns:
+        True if mpmath is installed, False otherwise
+
+    Internal Refs:
+        Uses MPMATH_AVAILABLE constant.
+    """
+    return MPMATH_AVAILABLE
+
+
+# =============================================================================
+# PySR - Symbolic Regression (Optional)
+# =============================================================================
+# NOTE: Deferred import - pysr is an optional dependency that requires Julia
+try:
+    from pysr import PySRRegressor
+    PYSR_AVAILABLE = True
+except ImportError:
+    PySRRegressor = None
+    PYSR_AVAILABLE = False
+
+
+def GetPySRRegressor():
+    """
+    Get the PySRRegressor class.
+
+    Returns:
+        PySRRegressor class
+
+    Raises:
+        ImportError: If pysr is not installed
+
+    Internal Refs:
+        Uses pysr for symbolic regression.
+    """
+    if not PYSR_AVAILABLE:
+        raise ImportError(
+            "PySR is required for FindFormula. Install with: uv add pysr\n"
+            "Note: PySR requires Julia to be installed."
+        )
+    return PySRRegressor
+
+
+def IsPySRAvailable():
+    """
+    Check if PySR is available.
+
+    Returns:
+        True if pysr is installed, False otherwise
+
+    Internal Refs:
+        Uses PYSR_AVAILABLE constant.
+    """
+    return PYSR_AVAILABLE
+
 
 # =============================================================================
 # Convenience Aliases
@@ -405,6 +504,9 @@ __all__ = [
     'fourier_transform', 'inverse_fourier_transform',
     'laplace_transform', 'inverse_laplace_transform',
 
+    # Finite differences
+    'finite_diff_weights',
+
     # NumPy array creation
     'array', 'zeros', 'ones', 'linspace', 'arange', 'meshgrid',
     'np_array', 'np_zeros', 'np_ones', 'np_empty', 'np_arange',
@@ -430,6 +532,13 @@ __all__ = [
 
     # SciPy
     'solve_ivp', 'scipy_quad', 'scipy_fsolve', 'scipy_minimize',
+
+    # mpmath (optional)
+    'mpmath_module', 'mpmath_mpf', 'mpmath_mpi', 'mpmath_mp',
+    'MPMATH_AVAILABLE', 'GetMpmath', 'IsMpmathAvailable',
+
+    # PySR (optional)
+    'PySRRegressor', 'PYSR_AVAILABLE', 'GetPySRRegressor', 'IsPySRAvailable',
 
     # Utilities
     'vectorize_symbolic', 'symbolic_to_numeric',
