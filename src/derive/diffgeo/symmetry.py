@@ -3,6 +3,10 @@ symmetry.py - Tensor Symmetry Handling
 
 Provides symmetry tracking and optimized storage for symmetric tensors.
 Exploiting symmetries reduces both computation time and storage requirements.
+
+Internal Refs:
+    Uses math_api.sp, math_api.MutableDenseNDimArray, math_api.ImmutableDenseNDimArray,
+    math_api.Integer, math_api.Matrix
 """
 
 from enum import Enum, auto
@@ -10,8 +14,14 @@ from functools import lru_cache
 from itertools import product as iterproduct
 from typing import Dict, Iterator, Callable, List, Optional, Tuple
 
-import sympy as sp
-from sympy import MutableDenseNDimArray, ImmutableDenseNDimArray
+from derive.core.math_api import (
+    sp,
+    MutableDenseNDimArray,
+    ImmutableDenseNDimArray,
+    Integer,
+    Matrix,
+    Expr,
+)
 
 
 class Symmetry(Enum):
@@ -100,31 +110,31 @@ class SymmetricMatrix:
         """
         self.n = n
         self._size = n * (n + 1) // 2
-        self._data: Dict[Tuple[int, int], sp.Expr] = {}
+        self._data: Dict[Tuple[int, int], Expr] = {}
 
     def _canonical_index(self, i: int, j: int) -> Tuple[int, int]:
         """Get canonical (i <= j) form of index pair."""
         return (min(i, j), max(i, j))
 
-    def __getitem__(self, indices: Tuple[int, int]) -> sp.Expr:
+    def __getitem__(self, indices: Tuple[int, int]) -> Expr:
         i, j = indices
         key = self._canonical_index(i, j)
-        return self._data.get(key, sp.Integer(0))
+        return self._data.get(key, Integer(0))
 
     def __setitem__(self, indices: Tuple[int, int], value):
         i, j = indices
         key = self._canonical_index(i, j)
         self._data[key] = value
 
-    def to_matrix(self) -> sp.Matrix:
+    def to_matrix(self) -> Matrix:
         """Convert to full sympy Matrix."""
-        m = sp.Matrix.zeros(self.n, self.n)
+        m = Matrix.zeros(self.n, self.n)
         for (i, j), val in self._data.items():
             m[i, j] = val
             m[j, i] = val
         return m
 
-    def unique_elements(self) -> Iterator[Tuple[int, int, sp.Expr]]:
+    def unique_elements(self) -> Iterator[Tuple[int, int, Expr]]:
         """Iterate over unique (i, j, value) triples."""
         for (i, j), val in self._data.items():
             yield i, j, val
@@ -147,7 +157,7 @@ class SymmetricChristoffel:
         """
         self.n = n
         # For each ρ, store symmetric matrix in (μ, ν)
-        self._data: Dict[Tuple[int, int, int], sp.Expr] = {}
+        self._data: Dict[Tuple[int, int, int], Expr] = {}
 
     def _canonical_index(self, rho: int, mu: int, nu: int) -> Tuple[int, int, int]:
         """Get canonical form with mu <= nu."""
@@ -155,10 +165,10 @@ class SymmetricChristoffel:
             return (rho, mu, nu)
         return (rho, nu, mu)
 
-    def __getitem__(self, indices: Tuple[int, int, int]) -> sp.Expr:
+    def __getitem__(self, indices: Tuple[int, int, int]) -> Expr:
         rho, mu, nu = indices
         key = self._canonical_index(rho, mu, nu)
-        return self._data.get(key, sp.Integer(0))
+        return self._data.get(key, Integer(0))
 
     def __setitem__(self, indices: Tuple[int, int, int], value):
         rho, mu, nu = indices

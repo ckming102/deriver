@@ -3,15 +3,21 @@ Composable API utilities for derive.
 
 Provides pipe-style operations and function composition for
 natural chaining of transformations on symbolic expressions.
+
+Internal Refs:
+    Uses math_api.sym_simplify, math_api.sym_expand, math_api.sym_factor,
+    math_api.sym_collect for simplification operations.
 """
 
 from functools import reduce
 from typing import Any, Callable, TypeVar, Union, List
 
-from sympy import simplify as sympy_simplify
-from sympy import expand as sympy_expand
-from sympy import factor as sympy_factor
-from sympy import collect as sympy_collect
+from derive.core.math_api import (
+    sym_simplify as sympy_simplify,
+    sym_expand as sympy_expand,
+    sym_factor as sympy_factor,
+    sym_collect as sympy_collect,
+)
 
 T = TypeVar('T')
 R = TypeVar('R')

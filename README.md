@@ -204,8 +204,11 @@ The `examples/` directory contains interactive Marimo notebooks demonstrating co
 | `differential_geometry.py` | Manifolds, curvature tensors, connections | [IPYNB](examples/rendered/differential_geometry.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/differential_geometry.html) |
 | `linearized_gravity.py` | Metric perturbations and gravitational waves | [IPYNB](examples/rendered/linearized_gravity.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/linearized_gravity.html) |
 | `renormalization_group.py` | CLT as RG fixed point, universality, beta functions | [IPYNB](examples/rendered/renormalization_group.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/renormalization_group.html) |
+| `numerical_relativity_stencils.py` | Lagrangians to finite difference stencils, code generation | [IPYNB](examples/rendered/numerical_relativity_stencils.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/numerical_relativity_stencils.html) |
 
 The RG notebook demonstrates how the Central Limit Theorem emerges as a renormalization group fixed point, inspired by [The Simplest Renormalization Group](https://dinunno.substack.com/p/the-simplest-renormalization-group).
+
+The numerical relativity stencils notebook demonstrates the pipeline from Lagrangians to numerical simulation code, based on [arXiv:1608.04408](https://arxiv.org/abs/1608.04408).
 
 ### Interactive Notebooks
 

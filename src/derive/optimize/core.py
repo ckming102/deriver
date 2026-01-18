@@ -5,12 +5,15 @@ A thin wrapper around cvxpy for convex optimization problems.
 Provides a simple interface while letting cvxpy handle solver backends.
 
 Requires: uv sync --extra optimize
+
+Internal Refs:
+    Uses cvxpy for optimization (specialized library, not abstracted).
 """
 
 from typing import Any, List, Optional, Union, Literal
 
-import sympy as sp
-
+# cvxpy is a specialized optimization library, not abstracted through math_api
+# NOTE: Deferred import - cvxpy is an optional dependency
 try:
     import cvxpy as cp
     CVXPY_AVAILABLE = True

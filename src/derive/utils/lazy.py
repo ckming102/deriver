@@ -3,12 +3,15 @@ Lazy evaluation utilities for derive.
 
 Provides lazy evaluation patterns for expensive symbolic computations,
 allowing expressions to be built up without immediate evaluation.
+
+Internal Refs:
+    Uses math_api.sym_simplify for simplification.
 """
 
 from functools import wraps
 from typing import Any, Callable, TypeVar, Generic, Optional
 
-from sympy import simplify as sympy_simplify
+from derive.core.math_api import sym_simplify as sympy_simplify
 
 T = TypeVar('T')
 

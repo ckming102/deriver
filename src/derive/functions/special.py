@@ -8,11 +8,19 @@ Provides special functions commonly used in physics and mathematics:
 - Error functions
 - Hypergeometric functions
 - And more
+
+Internal Refs:
+    Uses math_api special functions: factorial, binomial, gamma, beta,
+    besselj, bessely, besseli, besselk, hankel1, hankel2, legendre,
+    assoc_legendre, chebyshevt, chebyshevu, hermite, laguerre, assoc_laguerre,
+    gegenbauer, jacobi, Ynm, zeta, polylog, erf, erfc, erfi, Ei, Si, Ci, li,
+    fresnels, fresnelc, airyai, airybi, elliptic_k, elliptic_e, elliptic_f,
+    elliptic_pi, hyper, meijerg, sqrt, Rational, pi
 """
 
 from typing import List, Any
-import sympy as sp
-from sympy import (
+
+from derive.core.math_api import (
     factorial, binomial, gamma, beta,
     besselj, bessely, besseli, besselk,
     hankel1, hankel2,
@@ -20,7 +28,7 @@ from sympy import (
     chebyshevt, chebyshevu,
     hermite, laguerre, assoc_laguerre,
     gegenbauer, jacobi,
-    Ynm,  # Spherical harmonics
+    Ynm,
     zeta, polylog,
     erf, erfc, erfi,
     Ei, Si, Ci, li,
@@ -28,7 +36,7 @@ from sympy import (
     airyai, airybi,
     elliptic_k, elliptic_e, elliptic_f, elliptic_pi,
     hyper, meijerg,
-    sqrt, Rational,
+    sqrt, Rational, pi,
 )
 from derive.functions.utils import alias_function
 
@@ -58,7 +66,7 @@ def SphericalBesselJ(n: Any, x: Any) -> Any:
     Returns:
         j_n(x) = sqrt(pi/(2x)) * J_{n+1/2}(x)
     """
-    return sqrt(sp.pi / (2 * x)) * BesselJ(n + Rational(1, 2), x)
+    return sqrt(pi / (2 * x)) * BesselJ(n + Rational(1, 2), x)
 
 
 def SphericalBesselY(n: Any, x: Any) -> Any:
@@ -72,7 +80,7 @@ def SphericalBesselY(n: Any, x: Any) -> Any:
     Returns:
         y_n(x) = sqrt(pi/(2x)) * Y_{n+1/2}(x)
     """
-    return sqrt(sp.pi / (2 * x)) * BesselY(n + Rational(1, 2), x)
+    return sqrt(pi / (2 * x)) * BesselY(n + Rational(1, 2), x)
 
 
 # Orthogonal polynomials

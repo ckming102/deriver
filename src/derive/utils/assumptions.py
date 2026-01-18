@@ -2,13 +2,26 @@
 assumptions.py - Assumptions System for Symbolic Computation
 
 Provides context managers and utilities for working with mathematical assumptions.
+
+Internal Refs:
+    Uses math_api.Symbol, math_api.Q, math_api.ask, math_api.refine,
+    math_api.sym_simplify, math_api.global_assumptions, math_api.Predicate,
+    math_api.And
 """
 
 from contextlib import contextmanager
 from typing import Any, Dict, Optional, List, Union
-import sympy as sp
-from sympy import Symbol, Q, ask, refine, simplify
-from sympy.assumptions.assume import global_assumptions, Predicate
+
+from derive.core.math_api import (
+    Symbol,
+    Q,
+    ask,
+    refine,
+    sym_simplify as simplify,
+    global_assumptions,
+    Predicate,
+    And,
+)
 
 
 @contextmanager
@@ -75,7 +88,7 @@ def Refine(expr: Any, *assumptions) -> Any:
     if len(assumptions) == 1:
         combined = assumptions[0]
     else:
-        combined = sp.And(*assumptions)
+        combined = And(*assumptions)
 
     return refine(expr, combined)
 

@@ -2,9 +2,12 @@
 trig.py - Trigonometric Functions.
 
 Provides trigonometric functions with CamelCase naming.
+
+Internal Refs:
+    Uses math_api.sin, math_api.cos, math_api.tan, etc.
 """
 
-from sympy import (
+from derive.core.math_api import (
     sin, cos, tan, cot, sec, csc,
     sinh, cosh, tanh, coth, sech, csch,
     asin, acos, atan, acot, asec, acsc,

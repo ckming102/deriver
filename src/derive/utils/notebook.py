@@ -34,9 +34,10 @@ except ImportError:
     HTML = None
 
 # Optional dependency for Marimo
+# Note: mo.md() is only available inside a running marimo notebook
 try:
     import marimo as mo
-    MARIMO_AVAILABLE = True
+    MARIMO_AVAILABLE = hasattr(mo, 'md')
 except ImportError:
     MARIMO_AVAILABLE = False
     mo = None
