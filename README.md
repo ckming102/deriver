@@ -2,6 +2,11 @@
 
 A powerful symbolic mathematics library for Python.
 
+<p align="center">
+    <img src="https://i.imgur.com/gBkD68B.gif" width="220" alt="Y"> <br />
+    <em>Built from vibes for your pleasure.</em>
+</p>
+
 ## Features
 
 - **Symbolic Computation**: Work with mathematical expressions symbolically
