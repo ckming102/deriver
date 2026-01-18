@@ -34,13 +34,12 @@ _PRINTERS_PATCHED = False
 
 
 def _patch_sympy_printers() -> None:
-    """Patch SymPy printers so they respect alias names when available."""
+    """Patch SymPy string printers so they respect alias names when available."""
     global _PRINTERS_PATCHED
     if _PRINTERS_PATCHED:
         return
 
     try:
-        from sympy.printing.latex import LatexPrinter
         from sympy.printing.pretty.pretty import PrettyPrinter
         from sympy.printing.str import StrPrinter
     except ImportError:  # pragma: no cover - sympy always present in runtime
@@ -49,22 +48,24 @@ def _patch_sympy_printers() -> None:
     def _wrap(printer_cls):
         original = printer_cls._print_Function
 
-        def _print_Function(self, expr):
+        def _print_Function(self, expr, **kwargs):
             func = expr.func
             alias = getattr(func, "_alias_name", None)
             if alias:
                 original_name = getattr(func, "__name__", None)
                 try:
                     func.__name__ = alias
-                    return original(self, expr)
+                    return original(self, expr, **kwargs)
                 finally:
                     if original_name is not None:
                         func.__name__ = original_name
-            return original(self, expr)
+            return original(self, expr, **kwargs)
 
         printer_cls._print_Function = _print_Function
 
-    for printer in (StrPrinter, PrettyPrinter, LatexPrinter):
+    # Keep LaTeX output using SymPy's canonical names so math markup
+    # matches expected TeX functions (e.g., \sin instead of \operatorname{Sin}).
+    for printer in (StrPrinter, PrettyPrinter):
         _wrap(printer)
 
     _PRINTERS_PATCHED = True
