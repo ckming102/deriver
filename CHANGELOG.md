@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-18
+
+### Added
+- New `regression` module with `FindFormula` for symbolic regression (#2)
+  - Wraps PySR library for discovering mathematical formulas from data
+  - Supports multiple data formats: list of pairs, numpy arrays, (X, y) tuples
+  - Options: `target_functions`, `specificity_goal`, `time_constraint`, `performance_goal`
+  - Returns SymPy expressions compatible with all derive symbolic tools
+- Comprehensive symbolic regression example notebook (`examples/symbolic_regression.py`)
+- New `core/math_api.py` module providing abstraction layer for math libraries
+  - Centralizes NumPy/SymPy imports to enable future library swapping
+  - Exposes vectorized operations: `array`, `zeros`, `ones`, `linspace`, `dot`, `norm`
+
+### Changed
+- `pysr` and `cvxpy` are now required dependencies (previously optional)
+- Simplified `optimize/core.py` and `regression/core.py` imports (removed try/except blocks)
+- Re-rendered all example notebooks with cell outputs included
+- Updated README with symbolic_regression example in notebooks table
+
+### Fixed
+- Symbolic regression notebook now uses `Collect()` for cleaner polynomial display
+- Suppressed PySR warnings that exposed local file paths in rendered notebooks
+
 ## [0.1.0] - 2026-01-18
 
 ### Added

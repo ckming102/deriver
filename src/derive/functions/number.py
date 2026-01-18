@@ -2,14 +2,25 @@
 number.py - Number Theory and Numerical Functions.
 
 Provides functions for number manipulation and number theory:
-Sign, Floor, Ceiling, N, Round, Mod, GCD, LCM, PrimeQ, Prime, FactorInteger
+Sign, Floor, Ceiling, N, Round, Mod, GCD, LCM, PrimeQ, Prime, FactorInteger.
+
+Args:
+    Various depending on function.
+
+Returns:
+    Various depending on function.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, List, Optional, Literal
 
-import sympy as sp
-from sympy import sign, floor, ceiling, gcd, lcm, isprime, prime, factorint
-
+from derive.core.math_api import (
+    sp,
+    sign, floor, ceiling,
+    gcd, lcm, isprime, prime, factorint,
+)
 from derive.functions.utils import alias_function
 
 # Optional dependency for mpmath

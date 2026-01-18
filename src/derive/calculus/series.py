@@ -2,10 +2,25 @@
 series.py - Series, Sums, and Products.
 
 Provides series expansions and summations.
+
+Args:
+    expr: Expression to expand/sum/multiply.
+    var_point_order: Tuple specifying variable and bounds.
+
+Returns:
+    The series expansion, sum, or product result.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, Tuple
-from sympy import series, summation, product as sympy_product
+
+from derive.core.math_api import (
+    sym_series as series,
+    sym_summation as summation,
+    sym_product as sympy_product,
+)
 
 
 def Series(expr: Any, var_point_order: Tuple[Any, Any, int]) -> Any:

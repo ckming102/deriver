@@ -2,6 +2,7 @@
 Core module - Symbols and Constants.
 
 This module provides the foundational elements: symbols, functions, and mathematical constants.
+Also serves as the central gateway for external math libraries via math_api.
 """
 
 from derive.core.symbols import (
@@ -22,6 +23,13 @@ from derive.core.numbers import (
     R, Half, Third, Quarter, TwoThirds, ThreeQuarters,
 )
 
+# Math library adapter - centralized external library imports
+from derive.core.math_api import (
+    sp, np, sym,
+    scipy_integrate, scipy_optimize, scipy_stats,
+    vectorize_symbolic, symbolic_to_numeric,
+)
+
 __all__ = [
     # Symbols
     'Symbol', 'symbols', 'Function',
@@ -38,4 +46,8 @@ __all__ = [
     'float_to_rational', 'ensure_rational',
     # Rational shortcuts
     'R', 'Half', 'Third', 'Quarter', 'TwoThirds', 'ThreeQuarters',
+    # Math library adapter
+    'sp', 'np', 'sym',
+    'scipy_integrate', 'scipy_optimize', 'scipy_stats',
+    'vectorize_symbolic', 'symbolic_to_numeric',
 ]

@@ -3,12 +3,21 @@ Utility helpers for function aliases.
 
 Provides a lightweight wrapper so aliased functions print using the
 name of the alias rather than the underlying library function.
+
+Args:
+    name: The public alias (e.g., "Sin").
+    func: The underlying callable (e.g., sympy.sin).
+
+Returns:
+    FunctionAlias: a callable wrapper that prints as name.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, Callable
 
-from sympy.printing.pretty.pretty import PrettyPrinter
-from sympy.printing.str import StrPrinter
+from derive.core.math_api import PrettyPrinter, StrPrinter
 
 
 class FunctionAlias:

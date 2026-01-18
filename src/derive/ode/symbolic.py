@@ -2,10 +2,22 @@
 symbolic.py - Symbolic ODE Solver.
 
 Provides DSolve for symbolic differential equation solving.
+
+Args:
+    eq: Differential equation to solve.
+    func: Function to solve for (e.g., y(x)).
+    var: Independent variable.
+
+Returns:
+    List of solutions.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, List
-from sympy import dsolve
+
+from derive.core.math_api import sym_dsolve as dsolve
 
 
 def DSolve(eq: Any, func: Any, var: Any) -> List:

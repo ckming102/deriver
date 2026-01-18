@@ -12,7 +12,7 @@ Usage:
     D(x**3, x)            # Returns 3*x**2
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # Core: Symbols, Constants, and Smart Numbers
 from derive.core import (
@@ -167,15 +167,14 @@ from derive.plotting import *
 # Notebook integration module
 from derive.utils.notebook import *
 
-# Optimization module (optional - requires cvxpy)
-try:
-    from derive.optimize import (
-        OptVar, OptimizationProblem, Minimize, Maximize,
-        Norm as OptNorm, Sum as OptSum, Quad, PositiveSemidefinite,
-    )
-    _HAS_CVXPY = True
-except ImportError:
-    _HAS_CVXPY = False
+# Optimization module
+from derive.optimize import (
+    OptVar, OptimizationProblem, Minimize, Maximize,
+    Norm as OptNorm, Sum as OptSum, Quad, PositiveSemidefinite,
+)
+
+# Symbolic regression module
+from derive.regression import FindFormula
 
 # Comprehensive __all__ for `from derive import *`
 __all__ = [
@@ -299,11 +298,9 @@ __all__ = [
     'ComplexNumber', 'Quaternion', 'Vector3D',
     # SymPy passthrough for advanced use
     'Eq',
+    # Optimization
+    'OptVar', 'OptimizationProblem', 'Minimize', 'Maximize',
+    'OptNorm', 'OptSum', 'Quad', 'PositiveSemidefinite',
+    # Symbolic regression
+    'FindFormula',
 ]
-
-# Add optimization exports if cvxpy is available
-if _HAS_CVXPY:
-    __all__.extend([
-        'OptVar', 'OptimizationProblem', 'Minimize', 'Maximize',
-        'OptNorm', 'OptSum', 'Quad', 'PositiveSemidefinite',
-    ])
