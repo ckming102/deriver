@@ -6,8 +6,10 @@ Exploiting symmetries reduces both computation time and storage requirements.
 """
 
 from enum import Enum, auto
-from typing import List, Tuple, Dict, Optional, Iterator, Callable
+from functools import lru_cache
 from itertools import product as iterproduct
+from typing import Dict, Iterator, Callable, List, Optional, Tuple
+
 import sympy as sp
 from sympy import MutableDenseNDimArray, ImmutableDenseNDimArray
 
@@ -25,51 +27,53 @@ class Symmetry(Enum):
     ANTISYMMETRIC = auto()
 
 
-def symmetric_index_pairs(n: int) -> List[Tuple[int, int]]:
+@lru_cache(maxsize=32)
+def symmetric_index_pairs(n: int) -> Tuple[Tuple[int, int], ...]:
     """
     Generate all unique index pairs for a symmetric 2-tensor.
 
-    For n×n symmetric tensor, returns (n*(n+1))/2 pairs.
+    For nxn symmetric tensor, returns (n*(n+1))/2 pairs.
     Only yields (i, j) where i <= j.
+
+    This function is memoized for performance.
 
     Args:
         n: Dimension
 
     Returns:
-        List of (i, j) tuples with i <= j
+        Tuple of (i, j) tuples with i <= j
 
     Example:
         >>> symmetric_index_pairs(3)
-        [(0, 0), (0, 1), (0, 2), (1, 1), (1, 2), (2, 2)]
+        ((0, 0), (0, 1), (0, 2), (1, 1), (1, 2), (2, 2))
     """
-    pairs = []
-    for i in range(n):
-        for j in range(i, n):
-            pairs.append((i, j))
-    return pairs
+    return tuple((i, j) for i in range(n) for j in range(i, n))
 
 
-def symmetric_christoffel_indices(n: int) -> List[Tuple[int, int, int]]:
+@lru_cache(maxsize=32)
+def symmetric_christoffel_indices(n: int) -> Tuple[Tuple[int, int, int], ...]:
     """
-    Generate unique index triplets for Christoffel symbols Γ^ρ_μν.
+    Generate unique index triplets for Christoffel symbols.
 
-    Christoffel symbols are symmetric in lower indices: Γ^ρ_μν = Γ^ρ_νμ
-    So for each ρ, we only need μ <= ν pairs.
+    Christoffel symbols are symmetric in lower indices: Gamma^rho_mu nu = Gamma^rho_nu mu
+    So for each rho, we only need mu <= nu pairs.
 
     Total unique components: n * n*(n+1)/2
+
+    This function is memoized for performance.
 
     Args:
         n: Dimension
 
     Returns:
-        List of (rho, mu, nu) tuples with mu <= nu
+        Tuple of (rho, mu, nu) tuples with mu <= nu
     """
-    indices = []
-    for rho in range(n):
-        for mu in range(n):
-            for nu in range(mu, n):
-                indices.append((rho, mu, nu))
-    return indices
+    return tuple(
+        (rho, mu, nu)
+        for rho in range(n)
+        for mu in range(n)
+        for nu in range(mu, n)
+    )
 
 
 class SymmetricMatrix:
@@ -249,8 +253,6 @@ def levi_civita_tensor(n: int) -> ImmutableDenseNDimArray:
         >>> eps[1, 0, 2]
         -1
     """
-    from itertools import product as iterproduct
-
     shape = tuple([n] * n)
     arr = MutableDenseNDimArray.zeros(*shape)
 
@@ -276,8 +278,6 @@ def fill_symmetric_tensor(
         symmetric_pair: Tuple (pos1, pos2) of symmetric index positions
         compute_fn: Function(*indices) -> value for computing components
     """
-    from itertools import product as iterproduct
-
     shape = tensor.shape
     rank = len(shape)
     pos1, pos2 = symmetric_pair
@@ -313,8 +313,6 @@ def fill_antisymmetric_tensor(
         antisymmetric_pair: Tuple (pos1, pos2) of antisymmetric index positions
         compute_fn: Function(*indices) -> value for computing components
     """
-    from itertools import product as iterproduct
-
     shape = tensor.shape
     pos1, pos2 = antisymmetric_pair
 
@@ -355,8 +353,6 @@ def fill_with_symmetries(
         >>> # Riemann tensor R^ρ_{σμν} antisymmetric in (μ,ν) at positions (2,3)
         >>> fill_with_symmetries(R, compute_R, antisymmetric=[(2, 3)])
     """
-    from itertools import product as iterproduct
-
     shape = tensor.shape
     sym_pairs = symmetric or []
     antisym_pairs = antisymmetric or []

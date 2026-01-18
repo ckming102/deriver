@@ -5,9 +5,11 @@ Provides coordinate transformation functionality for converting
 between coordinate systems and transforming metric tensors.
 """
 
+from itertools import product as iterproduct
+from typing import List, Dict
+
 import sympy as sp
 from sympy import Symbol, symbols, Matrix, sin, cos
-from typing import List, Dict
 
 from derive.diffgeo.metrics import Metric
 
@@ -51,10 +53,11 @@ class CoordinateTransformation:
         n = len(self.old_coords)
         J = Matrix.zeros(n, n)
 
-        for i, old in enumerate(self.old_coords):
+        for i, j in iterproduct(range(n), range(n)):
+            old = self.old_coords[i]
+            new = self.new_coords[j]
             expr = self.transform.get(old, old)
-            for j, new in enumerate(self.new_coords):
-                J[i, j] = D(expr, new)
+            J[i, j] = D(expr, new)
 
         self._jacobian = J
         return self._jacobian
@@ -68,24 +71,24 @@ class CoordinateTransformation:
         """
         Transform a metric to new coordinates.
 
-        g'_{μν} = (∂x^ρ/∂x'^μ)(∂x^σ/∂x'^ν) g_{ρσ}
+        g'_{mu nu} = (partial x^rho/partial x'^mu)(partial x^sigma/partial x'^nu) g_{rho sigma}
         """
         J = self.jacobian
         n = metric.dim
 
-        # New metric components
+        # Pre-compute substituted metric components (dict-based substitution is more efficient)
+        g_substituted = Matrix.zeros(n, n)
+        for rho, sigma in iterproduct(range(n), range(n)):
+            g_substituted[rho, sigma] = metric.g[rho, sigma].subs(self.transform)
+
+        # New metric components using itertools.product
         g_new = Matrix.zeros(n, n)
-        for mu in range(n):
-            for nu in range(n):
-                val = 0
-                for rho in range(n):
-                    for sigma in range(n):
-                        # Substitute old coords with transform expressions
-                        g_comp = metric.g[rho, sigma]
-                        for old, expr in self.transform.items():
-                            g_comp = g_comp.subs(old, expr)
-                        val += J[rho, mu] * J[sigma, nu] * g_comp
-                g_new[mu, nu] = Simplify(val)
+        for mu, nu in iterproduct(range(n), range(n)):
+            val = sum(
+                J[rho, mu] * J[sigma, nu] * g_substituted[rho, sigma]
+                for rho, sigma in iterproduct(range(n), range(n))
+            )
+            g_new[mu, nu] = Simplify(val)
 
         return Metric(self.new_coords, g_new)
 

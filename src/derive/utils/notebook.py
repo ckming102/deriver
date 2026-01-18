@@ -5,46 +5,65 @@ This module provides Jupyter/IPython integration for derive,
 including LaTeX rendering and rich display of expressions.
 """
 
+import io
+import json
+from typing import Any, Optional
+
 import sympy as sp
 from sympy import latex
-from typing import Any, Optional
-import io
+
+# Optional dependencies for IPython/Jupyter
+try:
+    from IPython import get_ipython
+    from IPython.display import display, Math, Latex, HTML
+    IPYTHON_AVAILABLE = True
+except ImportError:
+    IPYTHON_AVAILABLE = False
+    get_ipython = None
+    display = None
+    Math = None
+    Latex = None
+    HTML = None
+
+# Optional dependency for Marimo
+try:
+    import marimo as mo
+    MARIMO_AVAILABLE = True
+except ImportError:
+    MARIMO_AVAILABLE = False
+    mo = None
 
 
 # Check if we're in a Jupyter/IPython environment
 def _in_notebook() -> bool:
     """Check if running in a Jupyter notebook."""
-    try:
-        from IPython import get_ipython
-        shell = get_ipython()
-        if shell is None:
-            return False
-        if shell.__class__.__name__ == 'ZMQInteractiveShell':
-            return True  # Jupyter notebook or qtconsole
-        elif shell.__class__.__name__ == 'TerminalInteractiveShell':
-            return False  # Terminal running IPython
-        else:
-            return False
-    except (ImportError, NameError):
+    if not IPYTHON_AVAILABLE:
+        return False
+    shell = get_ipython()
+    if shell is None:
+        return False
+    if shell.__class__.__name__ == 'ZMQInteractiveShell':
+        return True  # Jupyter notebook or qtconsole
+    elif shell.__class__.__name__ == 'TerminalInteractiveShell':
+        return False  # Terminal running IPython
+    else:
         return False
 
 
 def _display_latex(expr):
     """Display expression as LaTeX in Jupyter."""
-    try:
-        from IPython.display import display, Math, Latex
+    if IPYTHON_AVAILABLE:
         latex_str = latex(expr)
         display(Math(latex_str))
-    except ImportError:
+    else:
         print(expr)
 
 
 def _display_html(html_str: str):
     """Display HTML in Jupyter."""
-    try:
-        from IPython.display import display, HTML
+    if IPYTHON_AVAILABLE:
         display(HTML(html_str))
-    except ImportError:
+    else:
         print(html_str)
 
 
@@ -70,21 +89,17 @@ def enable_latex_printing():
     Call this at the start of a notebook to have all
     symbolic expressions render as LaTeX.
     """
-    try:
-        from IPython import get_ipython
-        from IPython.display import display, Math
+    if not IPYTHON_AVAILABLE:
+        return
 
-        ip = get_ipython()
-        if ip is None:
-            return
+    ip = get_ipython()
+    if ip is None:
+        return
 
-        # Enable SymPy's LaTeX printing
-        sp.init_printing(use_latex='mathjax')
+    # Enable SymPy's LaTeX printing
+    sp.init_printing(use_latex='mathjax')
 
-        print("LaTeX printing enabled. Symbolic expressions will render as math.")
-
-    except ImportError:
-        pass
+    print("LaTeX printing enabled. Symbolic expressions will render as math.")
 
 
 def MathForm(expr) -> str:
@@ -100,12 +115,8 @@ def MathForm(expr) -> str:
     """
     latex_str = latex(expr)
 
-    if _in_notebook():
-        try:
-            from IPython.display import display, Math
-            display(Math(latex_str))
-        except ImportError:
-            pass
+    if _in_notebook() and IPYTHON_AVAILABLE:
+        display(Math(latex_str))
 
     return latex_str
 
@@ -203,8 +214,10 @@ def setup_notebook():
     """
     enable_latex_printing()
 
+    if not IPYTHON_AVAILABLE:
+        return
+
     try:
-        from IPython import get_ipython
         ip = get_ipython()
         if ip:
             # Enable matplotlib inline
@@ -230,8 +243,6 @@ def create_notebook_template() -> str:
     Returns:
         JSON string of notebook content
     """
-    import json
-
     notebook = {
         "cells": [
             {
@@ -313,11 +324,12 @@ def save_notebook_template(path: str = "derive_template.ipynb"):
 
 def _in_marimo() -> bool:
     """Check if running in a Marimo notebook."""
+    if not MARIMO_AVAILABLE:
+        return False
     try:
-        import marimo as mo
         # Check if we're in a marimo runtime
         return mo.running_in_notebook()
-    except (ImportError, AttributeError):
+    except AttributeError:
         return False
 
 
@@ -334,12 +346,10 @@ def marimo_latex(expr) -> Any:
     Examples:
         >>> marimo_latex(x**2 + 1)
     """
-    try:
-        import marimo as mo
+    if MARIMO_AVAILABLE:
         latex_str = latex(expr)
         return mo.md(f"$${latex_str}$$")
-    except ImportError:
-        return f"$${latex(expr)}$$"
+    return f"$${latex(expr)}$$"
 
 
 def marimo_table(data, headings=None) -> Any:
@@ -353,23 +363,24 @@ def marimo_table(data, headings=None) -> Any:
     Returns:
         Marimo table element
     """
-    try:
-        import marimo as mo
-
-        # Convert data to list of dicts - marimo requires this format
-        if headings:
-            rows = [dict(zip(headings, row)) for row in data]
-        else:
-            # Generate column names if not provided
-            if data and hasattr(data[0], '__iter__'):
-                col_names = [f'col_{i}' for i in range(len(data[0]))]
-                rows = [dict(zip(col_names, row)) for row in data]
+    if MARIMO_AVAILABLE:
+        try:
+            # Convert data to list of dicts - marimo requires this format
+            if headings:
+                rows = [dict(zip(headings, row)) for row in data]
             else:
-                rows = [{'value': item} for item in data]
-        return mo.ui.table(rows)
-    except (ImportError, Exception):
-        # Fallback to standard TableForm
-        return TableForm(data, headings)
+                # Generate column names if not provided
+                if data and hasattr(data[0], '__iter__'):
+                    col_names = [f'col_{i}' for i in range(len(data[0]))]
+                    rows = [dict(zip(col_names, row)) for row in data]
+                else:
+                    rows = [{'value': item} for item in data]
+            return mo.ui.table(rows)
+        except Exception:
+            # Fallback to standard TableForm
+            return TableForm(data, headings)
+    # Fallback to standard TableForm
+    return TableForm(data, headings)
 
 
 def marimo_plot(fig) -> Any:
@@ -382,11 +393,9 @@ def marimo_plot(fig) -> Any:
     Returns:
         Marimo element displaying the plot
     """
-    try:
-        import marimo as mo
+    if MARIMO_AVAILABLE:
         return mo.as_html(fig)
-    except ImportError:
-        return fig
+    return fig
 
 
 def setup_marimo():
@@ -395,8 +404,7 @@ def setup_marimo():
 
     Call at the start of a Marimo notebook.
     """
-    try:
-        import marimo as mo
+    if MARIMO_AVAILABLE:
         # Marimo doesn't need explicit setup like Jupyter
         # but we can provide helpful output
         return mo.md("""
@@ -410,8 +418,7 @@ x = Symbol('x')
 Integrate(Sin(x), x)
 ```
         """)
-    except ImportError:
-        print("Marimo not available. Use Jupyter setup instead.")
+    print("Marimo not available. Use Jupyter setup instead.")
 
 
 def create_marimo_template() -> str:

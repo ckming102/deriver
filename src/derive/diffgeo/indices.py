@@ -19,6 +19,10 @@ Example:
     >>> T[a, -a]  # Trace (auto-contracts)
 """
 
+from collections import Counter
+from typing import List, Optional, Tuple, Union, Any, Sequence
+
+from sympy import Array, ImmutableDenseNDimArray, Symbol, diag, tensorcontraction
 from sympy.tensor.tensor import (
     TensorIndexType as _TensorIndexType,
     TensorIndex as _TensorIndex,
@@ -26,8 +30,6 @@ from sympy.tensor.tensor import (
     TensorSymmetry as _TensorSymmetry,
     tensor_indices as _tensor_indices,
 )
-from sympy import Array, ImmutableDenseNDimArray, Symbol, diag
-from typing import List, Optional, Tuple, Union, Any, Sequence
 
 # Re-export SymPy's TensorSymmetry for direct use
 TensorSymmetry = _TensorSymmetry
@@ -373,7 +375,6 @@ class IndexedTensor:
     def free_indices(self) -> List[Index]:
         """Get uncontracted (free) indices."""
         # Find indices that appear only once
-        from collections import Counter
         name_counts = Counter(idx.name for idx in self.indices)
         return [idx for idx in self.indices if name_counts[idx.name] == 1]
 
@@ -392,7 +393,6 @@ class IndexedTensor:
         if not contractions:
             return None
 
-        from sympy import tensorcontraction
         result = self.tensor.components
         for i, j in sorted(contractions, reverse=True):
             result = tensorcontraction(result, (i, j))

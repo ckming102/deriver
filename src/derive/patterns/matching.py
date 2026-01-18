@@ -211,14 +211,14 @@ class Rule:
                 try:
                     if not self.condition(match):
                         return expr, False
-                except:
+                except (TypeError, ValueError, AttributeError):
                     return expr, False
 
             # Apply substitution
             try:
                 result = self.replacement.xreplace(match)
                 return result, True
-            except:
+            except (TypeError, ValueError, AttributeError):
                 return expr, False
 
         return expr, False
@@ -346,7 +346,7 @@ def ReplaceAll(expr: Any, *rules: Union[Rule, Tuple[Any, Any], Dict[Any, Any]]) 
         if changed:
             try:
                 e = e.func(*new_args)
-            except:
+            except (TypeError, ValueError, AttributeError):
                 pass
 
         # Then try to apply rules to the expression itself

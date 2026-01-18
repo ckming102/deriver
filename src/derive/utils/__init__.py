@@ -34,6 +34,15 @@ from derive.utils.assumptions import (
     Complex as ComplexPred, Even, Odd, Prime as PrimePred,
     Nonzero, Nonnegative, Nonpositive, Finite, Infinite, Zero, Bounded,
 )
+from derive.utils.validation import (
+    ValidationError, validate_tuple, validate_range_tuple, validate_var_tuple,
+    validate_positive_int, validate_nonnegative_int, is_tuple_like,
+)
+from derive.utils.functional import (
+    matrix_method, binary_matrix_method, symbolic_to_callable,
+    apply_to_ranges, curry, flip, identity, const,
+    foldl, foldr, scanl, take_while, drop_while, group_by,
+)
 
 __all__ = [
     # Display
@@ -60,4 +69,11 @@ __all__ = [
     'Positive', 'Negative', 'Real', 'IntegerPred', 'RationalPred',
     'ComplexPred', 'Even', 'Odd', 'PrimePred',
     'Nonzero', 'Nonnegative', 'Nonpositive', 'Finite', 'Infinite', 'Zero', 'Bounded',
+    # Validation
+    'ValidationError', 'validate_tuple', 'validate_range_tuple', 'validate_var_tuple',
+    'validate_positive_int', 'validate_nonnegative_int', 'is_tuple_like',
+    # Functional utilities
+    'matrix_method', 'binary_matrix_method', 'symbolic_to_callable',
+    'apply_to_ranges', 'curry', 'flip', 'identity', 'const',
+    'foldl', 'foldr', 'scanl', 'take_while', 'drop_while', 'group_by',
 ]

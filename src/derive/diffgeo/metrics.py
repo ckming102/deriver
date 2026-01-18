@@ -27,6 +27,7 @@ from derive.algebra import Simplify
 # Symmetry utilities
 from derive.diffgeo.symmetry import (
     symmetric_christoffel_indices,
+    symmetric_index_pairs,
     fill_antisymmetric_tensor,
 )
 
@@ -191,6 +192,8 @@ class Metric:
     def ricci_tensor(self) -> Matrix:
         """
         Compute Ricci tensor: R_{μν} = R^ρ_{μρν}.
+
+        Exploits symmetry R_{μν} = R_{νμ} to compute only n(n+1)/2 components.
         """
         if self._ricci is not None:
             return self._ricci
@@ -199,10 +202,13 @@ class Metric:
         R = self.riemann_tensor()
         Ric = Matrix.zeros(n, n)
 
-        for mu in range(n):
-            for nu in range(n):
-                val = sum(R[rho, mu, rho, nu] for rho in range(n))
-                Ric[mu, nu] = Simplify(val)
+        # Exploit symmetry: R_{μν} = R_{νμ}, only compute μ <= ν
+        for mu, nu in symmetric_index_pairs(n):
+            val = sum(R[rho, mu, rho, nu] for rho in range(n))
+            simplified = Simplify(val)
+            Ric[mu, nu] = simplified
+            if mu != nu:
+                Ric[nu, mu] = simplified  # Symmetric
 
         self._ricci = Ric
         return self._ricci
@@ -227,15 +233,20 @@ class Metric:
     def einstein_tensor(self) -> Matrix:
         """
         Compute Einstein tensor: G_{μν} = R_{μν} - (1/2)g_{μν}R.
+
+        Exploits symmetry G_{μν} = G_{νμ} to compute only n(n+1)/2 components.
         """
         Ric = self.ricci_tensor()
         R = self.ricci_scalar()
         n = self.dim
 
         G = Matrix.zeros(n, n)
-        for mu in range(n):
-            for nu in range(n):
-                G[mu, nu] = Simplify(Ric[mu, nu] - Rational(1, 2) * self.g[mu, nu] * R)
+        # Exploit symmetry: G_{μν} = G_{νμ}, only compute μ <= ν
+        for mu, nu in symmetric_index_pairs(n):
+            simplified = Simplify(Ric[mu, nu] - Rational(1, 2) * self.g[mu, nu] * R)
+            G[mu, nu] = simplified
+            if mu != nu:
+                G[nu, mu] = simplified  # Symmetric
 
         return G
 
@@ -364,16 +375,16 @@ def CovariantDerivative(tensor: Tensor, coord_idx: int, metric: Metric) -> Tenso
         if tensor.is_upper(0):
             # Contravariant vector (positive index)
             for nu in range(n):
-                val = D(tensor[nu], coord)
-                for lam in range(n):
-                    val += gamma[nu, coord_idx, lam] * tensor[lam]
+                val = D(tensor[nu], coord) + sum(
+                    gamma[nu, coord_idx, lam] * tensor[lam] for lam in range(n)
+                )
                 result[nu] = Simplify(val)
         else:
             # Covariant vector (negative index)
             for nu in range(n):
-                val = D(tensor[nu], coord)
-                for lam in range(n):
-                    val -= gamma[lam, coord_idx, nu] * tensor[lam]
+                val = D(tensor[nu], coord) - sum(
+                    gamma[lam, coord_idx, nu] * tensor[lam] for lam in range(n)
+                )
                 result[nu] = Simplify(val)
 
         return Tensor(f"∇_{coord_idx}({tensor.name})", ImmutableDenseNDimArray(result),
