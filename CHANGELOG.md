@@ -8,10 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-01-18
 
 ### Added
+- Claude Code enforcement agents in `agents/` directory
+  - `code_standards_enforcer.py`: Validates code against project conventions
+    - No imports inside functions
+    - Self-reference derive API (not raw SymPy)
+    - No nested for loops (use itertools.product)
+    - No special characters/emojis
+    - CamelCase naming for public API functions
+    - Test file modification warnings
+  - `test_coverage_check.sh`: Warns when source files lack corresponding tests
+  - Hooks configured in `.claude/settings.json` for automatic enforcement
 - New `discretization` module for converting symbolic PDEs to finite difference stencils (#3)
   - `Discretize()`: Convert derivatives to finite difference approximations
   - `ToStencil()`: Generate stencil weights from symbolic expressions
   - `StencilCodeGen()`: Generate numerical code in Python, C++, Julia, Fortran
+  - `FiniteDiffWeights()`: Auto-compute stencil coefficients via Taylor series expansion
+  - `Stencil()`: Convenience function returning stencil as {offset: weight} dict
   - Supports arbitrary derivative orders and accuracy
 - New example notebook `numerical_relativity_stencils.py` demonstrating:
   - Deriving equations of motion from Lagrangians using variational calculus
@@ -32,7 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Removed redundant mid-function import in `discretization/stencils.py`
-- PySR import now properly guarded with try/except and `PYSR_AVAILABLE` flag
+- PySR/Julia now truly lazy-loaded - only initialized when `FindFormula()` is called
+  - Fixes marimo notebook export hanging due to Julia initialization
+  - Importing `derive` no longer triggers Julia startup
 
 ## [0.2.0] - 2026-01-18
 
