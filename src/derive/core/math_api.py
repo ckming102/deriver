@@ -327,7 +327,7 @@ def GetPySRRegressor():
     """
     if not PYSR_AVAILABLE:
         raise ImportError(
-            "PySR is required for FindFormula. Install with: uv add pysr\n"
+            "PySR is required for FindFormula. Install with: uv sync --extra regression\n"
             "Note: PySR requires Julia to be installed."
         )
     return PySRRegressor

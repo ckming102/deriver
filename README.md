@@ -35,6 +35,7 @@ Some features require optional dependencies:
 ```bash
 uv sync --extra notebooks   # Marimo interactive notebooks
 uv sync --extra optimize    # Convex optimization (cvxpy)
+uv sync --extra regression  # Symbolic regression (pysr + Julia)
 uv sync --extra all         # All optional dependencies
 ```
 

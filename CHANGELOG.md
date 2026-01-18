@@ -58,6 +58,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Applies finite difference stencils in both directions
 - `ChangeVariables` now warns when non-injective substitutions yield multiple solutions (#11)
   - Alerts users to use domain restrictions (e.g., `positive=True`)
+- `OptVar._registry` now uses `WeakValueDictionary` to prevent memory leaks (#12)
+  - OptVars are automatically removed from registry when garbage collected
+- `ExpressionCache` docstring incorrectly claimed weak reference usage (#14)
+  - Updated to accurately describe FIFO eviction behavior
+
+### Changed
+- `pysr` moved from base dependency to optional `regression` extra (#13)
+  - Install with `uv sync --extra regression`
+  - Prevents Julia installation for users who don't need `FindFormula`
 
 ## [0.2.0] - 2026-01-18
 

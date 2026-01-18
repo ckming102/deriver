@@ -10,6 +10,7 @@ Internal Refs:
     Uses cvxpy for optimization (specialized library, not abstracted).
 """
 
+import weakref
 from typing import Any, List, Optional, Union, Literal
 
 # cvxpy is a specialized optimization library, not abstracted through math_api
@@ -53,8 +54,9 @@ class OptVar:
         >>> w = OptVar('w', bounds=(0, 10))
     """
 
-    # Registry mapping cvxpy Variables to OptVars for bound collection
-    _registry: dict = {}
+    # Registry mapping cvxpy Variables to OptVars for bound collection.
+    # Uses WeakValueDictionary so OptVars can be garbage collected when no longer referenced.
+    _registry: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
 
     def __init__(
         self,

@@ -9,7 +9,6 @@ Internal Refs:
 """
 
 import hashlib
-import weakref
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, TypeVar, Hashable
 
@@ -22,7 +21,7 @@ class ExpressionCache:
     """
     A cache for symbolic expressions keyed by their string representation.
 
-    Uses weak references to allow garbage collection of unused values.
+    Uses FIFO eviction when maxsize is reached.
 
     Parameters
     ----------
