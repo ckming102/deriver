@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-18
+
+### Added
+- New `discretization` module for converting symbolic PDEs to finite difference stencils (#3)
+  - `Discretize()`: Convert derivatives to finite difference approximations
+  - `ToStencil()`: Generate stencil weights from symbolic expressions
+  - `StencilCodeGen()`: Generate numerical code in Python, C++, Julia, Fortran
+  - Supports arbitrary derivative orders and accuracy
+- New example notebook `numerical_relativity_stencils.py` demonstrating:
+  - Deriving equations of motion from Lagrangians using variational calculus
+  - Converting symbolic PDEs to finite difference stencils
+  - Generating code for numerical simulations (based on arXiv:1608.04408)
+
+### Changed
+- **BREAKING**: All modules now import from `derive.core.math_api` instead of directly from sympy/numpy/scipy
+  - This enforces the centralized math library abstraction layer
+  - External library usage is now fully encapsulated in `math_api.py`
+  - Enables future library swapping without changing consumer code
+- Added `Internal Refs:` docstring sections to all modified modules documenting math_api dependencies
+- Extended `math_api.py` exports:
+  - Integral transforms: `fourier_transform`, `inverse_fourier_transform`, `laplace_transform`, `inverse_laplace_transform`
+  - Comparison operators: `Eq`, `Ne`, `Lt`, `Le`, `Gt`, `Ge`, `Max`, `Min`
+  - Special functions: `gegenbauer`, `jacobi`, `Ynm`, `beta`, `li`
+  - Array operations: `permutedims`
+
+### Fixed
+- Removed redundant mid-function import in `discretization/stencils.py`
+- PySR import now properly guarded with try/except and `PYSR_AVAILABLE` flag
+
 ## [0.2.0] - 2026-01-18
 
 ### Added

@@ -3,12 +3,24 @@ matching.py - Pattern Matching and Transformation
 
 Provides pattern matching and expression transformation capabilities
 using term rewriting techniques.
+
+Internal Refs:
+    Uses math_api.Wild, math_api.Symbol, math_api.Expr, math_api.Integer,
+    math_api.Float, math_api.Rational, math_api.sym_Basic, math_api.sp
 """
 
 from typing import Any, Dict, List, Optional, Tuple, Union, Callable
-import sympy as sp
-from sympy import Wild, Symbol, Expr, Integer, Float, Rational
-from sympy.core.basic import Basic
+
+from derive.core.math_api import (
+    sp,
+    Wild,
+    Symbol,
+    Expr,
+    Integer,
+    Float,
+    Rational,
+    sym_Basic as Basic,
+)
 
 
 def _create_wild(name: str) -> Wild:

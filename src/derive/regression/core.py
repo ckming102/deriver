@@ -26,7 +26,15 @@ from derive.core.math_api import (
     Symbol,
     nan,
 )
-from pysr import PySRRegressor
+
+# PySR is a specialized symbolic regression library, not abstracted through math_api
+# NOTE: Deferred import - pysr is a specialized optional dependency
+try:
+    from pysr import PySRRegressor
+    PYSR_AVAILABLE = True
+except ImportError:
+    PySRRegressor = None
+    PYSR_AVAILABLE = False
 
 
 # Map symbolic function names to PySR operators

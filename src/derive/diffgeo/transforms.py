@@ -3,13 +3,23 @@ transforms.py - Coordinate Transformations
 
 Provides coordinate transformation functionality for converting
 between coordinate systems and transforming metric tensors.
+
+Internal Refs:
+    Uses math_api.Symbol, math_api.symbols, math_api.Matrix,
+    math_api.sin, math_api.cos, math_api.Expr
 """
 
 from itertools import product as iterproduct
 from typing import List, Dict
 
-import sympy as sp
-from sympy import Symbol, symbols, Matrix, sin, cos
+from derive.core.math_api import (
+    Symbol,
+    symbols,
+    Matrix,
+    sin,
+    cos,
+    Expr,
+)
 
 from derive.diffgeo.metrics import Metric
 
@@ -24,7 +34,7 @@ class CoordinateTransformation:
     """
 
     def __init__(self, old_coords: List[Symbol], new_coords: List[Symbol],
-                 transform_eqs: Dict[Symbol, sp.Expr]):
+                 transform_eqs: Dict[Symbol, Expr]):
         """
         Initialize a coordinate transformation.
 
@@ -63,7 +73,7 @@ class CoordinateTransformation:
         return self._jacobian
 
     @property
-    def jacobian_determinant(self) -> sp.Expr:
+    def jacobian_determinant(self) -> Expr:
         """Get the Jacobian determinant."""
         return self.jacobian.det()
 

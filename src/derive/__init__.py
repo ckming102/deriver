@@ -148,8 +148,9 @@ from derive.types import (
     ComplexNumber, Quaternion, Vector3D,
 )
 
-# Additional SymPy exports for advanced use
-from sympy import Eq
+# Additional SymPy exports for advanced use (via math_api gateway)
+from derive.core.math_api import sp
+Eq = sp.Eq
 
 # Differential geometry module
 from derive.diffgeo import *
@@ -175,6 +176,11 @@ from derive.optimize import (
 
 # Symbolic regression module
 from derive.regression import FindFormula
+
+# Discretization module
+from derive.discretization import (
+    Discretize, Discretizer, ToStencil, StencilCodeGen,
+)
 
 # Comprehensive __all__ for `from derive import *`
 __all__ = [
@@ -303,4 +309,6 @@ __all__ = [
     'OptNorm', 'OptSum', 'Quad', 'PositiveSemidefinite',
     # Symbolic regression
     'FindFormula',
+    # Discretization
+    'Discretize', 'Discretizer', 'ToStencil', 'StencilCodeGen',
 ]

@@ -2,9 +2,12 @@
 complex.py - Complex Number Functions.
 
 Provides functions for working with complex numbers: Re, Im, Conjugate, Arg, Abs.
+
+Internal Refs:
+    Uses math_api.re, math_api.im, math_api.conjugate, math_api.arg, math_api.Abs
 """
 
-from sympy import re, im, conjugate, arg, Abs as sympy_abs
+from derive.core.math_api import re, im, conjugate, arg, Abs as sympy_abs
 from derive.functions.utils import alias_function
 
 # Complex number functions

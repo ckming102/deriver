@@ -3,17 +3,30 @@ greens.py - Green's Functions for PDEs
 
 Provides Green's functions for common differential operators.
 These are solutions to equations of the form L[G] = δ.
+
+Internal Refs:
+    Uses math_api.Symbol, math_api.symbols, math_api.Piecewise,
+    math_api.Heaviside, math_api.Abs, math_api.exp, math_api.pi, math_api.sym_I
 """
 
-import sympy as sp
-from sympy import (
-    Symbol, symbols, Piecewise, Heaviside, Abs, exp, pi, I,
-)
 from typing import Dict, Optional
 
+from derive.core.math_api import (
+    sp,
+    Symbol,
+    symbols,
+    Piecewise,
+    Heaviside,
+    Abs,
+    exp,
+    pi,
+    sym_I as I,
+    Expr,
+)
 
-def GreenFunction(operator: sp.Expr, var: Symbol, source_var: Symbol,
-                  boundary_conditions: Optional[Dict] = None) -> sp.Expr:
+
+def GreenFunction(operator: Expr, var: Symbol, source_var: Symbol,
+                  boundary_conditions: Optional[Dict] = None) -> Expr:
     """
     Compute the Green's function for a linear differential operator.
 
@@ -53,7 +66,7 @@ def GreenFunction(operator: sp.Expr, var: Symbol, source_var: Symbol,
     return G
 
 
-def GreenFunctionPoisson1D(x: Symbol, xp: Symbol, L: sp.Expr) -> sp.Expr:
+def GreenFunctionPoisson1D(x: Symbol, xp: Symbol, L: Expr) -> Expr:
     """
     Green's function for 1D Poisson equation -d²u/dx² = f on [0, L].
 
@@ -76,7 +89,7 @@ def GreenFunctionPoisson1D(x: Symbol, xp: Symbol, L: sp.Expr) -> sp.Expr:
     )
 
 
-def GreenFunctionHelmholtz1D(x: Symbol, xp: Symbol, k: Symbol) -> sp.Expr:
+def GreenFunctionHelmholtz1D(x: Symbol, xp: Symbol, k: Symbol) -> Expr:
     """
     Green's function for 1D Helmholtz equation (d²/dx² + k²)u = f.
 
@@ -95,7 +108,7 @@ def GreenFunctionHelmholtz1D(x: Symbol, xp: Symbol, k: Symbol) -> sp.Expr:
     return -I / (2*k) * exp(I * k * Abs(x - xp))
 
 
-def GreenFunctionLaplacian3D(r: sp.Expr) -> sp.Expr:
+def GreenFunctionLaplacian3D(r: Expr) -> Expr:
     """
     Green's function for 3D Laplacian ∇²G = δ³(r).
 
@@ -110,7 +123,7 @@ def GreenFunctionLaplacian3D(r: sp.Expr) -> sp.Expr:
     return -1 / (4 * pi * r)
 
 
-def GreenFunctionWave1D(x: Symbol, t: Symbol, xp: Symbol, tp: Symbol, c: Symbol) -> sp.Expr:
+def GreenFunctionWave1D(x: Symbol, t: Symbol, xp: Symbol, tp: Symbol, c: Symbol) -> Expr:
     """
     Green's function for 1D wave equation (∂²/∂t² - c²∂²/∂x²)u = f.
 

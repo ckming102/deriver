@@ -7,6 +7,11 @@ modes, and utilities for converting between number representations.
 Design Principle:
 Everything is automatically a rational complex number unless you specify decimal,
 then it is arbitrary precision. Other approximation methods available when specified.
+
+Internal Refs:
+    Uses math_api.Rational, math_api.Integer, math_api.Float, math_api.sym_nsimplify,
+    math_api.Symbol, math_api.parse_expr, math_api.standard_transformations,
+    math_api.implicit_multiplication_application, math_api.convert_xor
 """
 
 import re
@@ -14,9 +19,13 @@ from contextlib import contextmanager
 from fractions import Fraction
 from typing import Any, Optional, Generator
 
-import sympy as sp
-from sympy import Rational, Integer, Float, nsimplify, Symbol
-from sympy.parsing.sympy_parser import (
+from derive.core.math_api import (
+    sp,
+    Rational,
+    Integer,
+    Float,
+    sym_nsimplify as nsimplify,
+    Symbol,
     parse_expr,
     standard_transformations,
     implicit_multiplication_application,

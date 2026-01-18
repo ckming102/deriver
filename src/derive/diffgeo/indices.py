@@ -17,13 +17,23 @@ Example:
     >>> T = Tensor('T', spacetime, spacetime)
     >>> T[a, -b]  # T^a_b
     >>> T[a, -a]  # Trace (auto-contracts)
+
+Internal Refs:
+    Uses math_api.Array, math_api.ImmutableDenseNDimArray, math_api.Symbol,
+    math_api.sym_diag, math_api.tensorcontraction, math_api.TensorIndexType,
+    math_api.TensorIndex, math_api.TensorHead, math_api.TensorSymmetry,
+    math_api.tensor_indices
 """
 
 from collections import Counter
 from typing import List, Optional, Tuple, Union, Any, Sequence
 
-from sympy import Array, ImmutableDenseNDimArray, Symbol, diag, tensorcontraction
-from sympy.tensor.tensor import (
+from derive.core.math_api import (
+    Array,
+    ImmutableDenseNDimArray,
+    Symbol,
+    sym_diag as diag,
+    tensorcontraction,
     TensorIndexType as _TensorIndexType,
     TensorIndex as _TensorIndex,
     TensorHead as _TensorHead,

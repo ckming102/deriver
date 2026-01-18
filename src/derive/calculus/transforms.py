@@ -2,15 +2,28 @@
 transforms.py - Integral Transforms
 
 Provides Fourier, Laplace, and related integral transforms.
+
+Internal Refs:
+    Uses math_api.fourier_transform, math_api.inverse_fourier_transform,
+    math_api.laplace_transform, math_api.inverse_laplace_transform,
+    math_api.Symbol, math_api.oo, math_api.exp, math_api.sym_I, math_api.pi,
+    math_api.sqrt, math_api.Integral
 """
 
 from typing import Any, Optional, Tuple
 
-import sympy as sp
-from sympy import (
-    fourier_transform, inverse_fourier_transform,
-    laplace_transform, inverse_laplace_transform,
-    Symbol, oo, exp, I, pi, sqrt, Integral,
+from derive.core.math_api import (
+    fourier_transform,
+    inverse_fourier_transform,
+    laplace_transform,
+    inverse_laplace_transform,
+    Symbol,
+    oo,
+    exp,
+    sym_I as I,
+    pi,
+    sqrt,
+    Integral,
 )
 
 

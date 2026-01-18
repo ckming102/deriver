@@ -3,15 +3,25 @@ einsum.py - Einstein Summation and Tensor Contractions
 
 Provides Einstein summation notation for tensor operations using
 SymPy's native tensor machinery.
+
+Internal Refs:
+    Uses math_api.Array, math_api.MutableDenseNDimArray, math_api.ImmutableDenseNDimArray,
+    math_api.tensorcontraction, math_api.tensorproduct, math_api.Expr
 """
 
 from typing import Any, Dict, List, Tuple, Union
-import sympy as sp
-from sympy import (
-    Array, MutableDenseNDimArray, ImmutableDenseNDimArray,
-    tensorcontraction, tensorproduct, permutedims,
-)
 from itertools import product as iterproduct
+
+from derive.core.math_api import (
+    sp,
+    Array,
+    MutableDenseNDimArray,
+    ImmutableDenseNDimArray,
+    tensorcontraction,
+    tensorproduct,
+    permutedims,
+    Expr,
+)
 
 
 def Einsum(subscripts: str, *operands: Array) -> Array:
@@ -220,7 +230,7 @@ def OuterProduct(a: Array, b: Array) -> Array:
     return tensorproduct(a, b)
 
 
-def InnerProduct(a: Array, b: Array) -> sp.Expr:
+def InnerProduct(a: Array, b: Array) -> Expr:
     """
     Compute inner product (full contraction) of two arrays.
 

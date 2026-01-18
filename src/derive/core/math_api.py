@@ -87,6 +87,7 @@ from sympy import (
     Array,
     ImmutableDenseNDimArray,
     MutableDenseNDimArray,
+    permutedims,
 )
 
 # Functions
@@ -99,8 +100,9 @@ from sympy import (
     Abs, sign, floor, ceiling,
     re, im, conjugate, arg,
     Heaviside, DiracDelta,
-    gamma, factorial, binomial,
+    gamma, factorial, binomial, beta,
     legendre, assoc_legendre, hermite, chebyshevt, chebyshevu, laguerre, assoc_laguerre,
+    gegenbauer, jacobi, Ynm, li,
     besselj, bessely, besseli, besselk, hankel1, hankel2,
     jn, yn,
     erf, erfc, erfi, erf2,
@@ -152,10 +154,19 @@ from sympy import (
 )
 from sympy.assumptions.assume import global_assumptions, Predicate
 
+# Comparison operators
+from sympy import Eq, Ne, Lt, Le, Gt, Ge, Max, Min
+
 # Number theory
 from sympy import (
     gcd, lcm, isprime, prime, factorint, primefactors, totient, divisors,
     npartitions,
+)
+
+# Integral transforms
+from sympy import (
+    fourier_transform, inverse_fourier_transform,
+    laplace_transform, inverse_laplace_transform,
 )
 
 # =============================================================================
@@ -345,7 +356,7 @@ __all__ = [
     # Linear algebra
     'Matrix', 'sym_eye', 'sym_zeros', 'sym_diag',
     'tensorproduct', 'tensorcontraction', 'derive_by_array',
-    'Array', 'ImmutableDenseNDimArray', 'MutableDenseNDimArray',
+    'Array', 'ImmutableDenseNDimArray', 'MutableDenseNDimArray', 'permutedims',
 
     # Functions
     'sin', 'cos', 'tan', 'cot', 'sec', 'csc',
@@ -359,6 +370,7 @@ __all__ = [
     'legendre', 'assoc_legendre', 'hermite', 'chebyshevt', 'chebyshevu',
     'laguerre', 'assoc_laguerre',
     'besselj', 'bessely', 'besseli', 'besselk', 'hankel1', 'hankel2', 'jn', 'yn',
+    'gegenbauer', 'jacobi', 'Ynm', 'beta', 'li',
     'erf', 'erfc', 'erfi', 'erf2', 'Ei', 'expint', 'Si', 'Ci', 'Shi', 'Chi',
     'fresnels', 'fresnelc',
     'airyai', 'airybi', 'airyaiprime', 'airybiprime',
@@ -383,8 +395,15 @@ __all__ = [
     'Q', 'ask', 'refine', 'Piecewise', 'And', 'Or', 'Not', 'Implies', 'Xor', 'Nand', 'Nor', 'Equivalent',
     'global_assumptions', 'Predicate',
 
+    # Comparison operators
+    'Eq', 'Ne', 'Lt', 'Le', 'Gt', 'Ge', 'Max', 'Min',
+
     # Number theory
     'gcd', 'lcm', 'isprime', 'prime', 'factorint', 'primefactors', 'totient', 'divisors', 'npartitions',
+
+    # Integral transforms
+    'fourier_transform', 'inverse_fourier_transform',
+    'laplace_transform', 'inverse_laplace_transform',
 
     # NumPy array creation
     'array', 'zeros', 'ones', 'linspace', 'arange', 'meshgrid',

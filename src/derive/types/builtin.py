@@ -2,11 +2,14 @@
 builtin.py - Built-in Custom Types
 
 Provides pre-built types: ComplexNumber, Quaternion, Vector3D.
+
+Internal Refs:
+    Uses math_api.sqrt
 """
 
 from typing import Type
-import sympy as sp
 
+from derive.core.math_api import sqrt
 from derive.types.base import CustomType, DefineType
 
 
@@ -46,7 +49,7 @@ def create_complex_type() -> Type[CustomType]:
 
     Complex.define_op('__neg__', lambda a: Complex(-a.real, -a.imag))
 
-    Complex.define_op('__abs__', lambda a: sp.sqrt(a.real**2 + a.imag**2))
+    Complex.define_op('__abs__', lambda a: sqrt(a.real**2 + a.imag**2))
 
     # Conjugate method
     Complex.define_method('conjugate', lambda self: Complex(self.real, -self.imag))
@@ -103,7 +106,7 @@ def create_quaternion_type() -> Type[CustomType]:
 
     # Norm/Abs
     Quaternion.define_op('__abs__', lambda q:
-        sp.sqrt(q.r**2 + q.i**2 + q.j**2 + q.k**2))
+        sqrt(q.r**2 + q.i**2 + q.j**2 + q.k**2))
 
     # Conjugate
     Quaternion.define_method('conjugate', lambda self:
@@ -148,7 +151,7 @@ def create_vector3d_type() -> Type[CustomType]:
     Vector3D.define_op('__neg__', lambda v: Vector3D(-v.x, -v.y, -v.z))
 
     # Magnitude
-    Vector3D.define_op('__abs__', lambda v: sp.sqrt(v.x**2 + v.y**2 + v.z**2))
+    Vector3D.define_op('__abs__', lambda v: sqrt(v.x**2 + v.y**2 + v.z**2))
 
     # Dot product
     Vector3D.define_method('dot', lambda self, other:
