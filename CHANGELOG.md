@@ -19,8 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Exposes vectorized operations: `array`, `zeros`, `ones`, `linspace`, `dot`, `norm`
 
 ### Changed
-- `pysr` and `cvxpy` are now required dependencies (previously optional)
+- `pysr` is now a required dependency (previously optional)
 - `marimo` is now an optional dependency - install with `uv sync --extra notebooks`
+- `cvxpy` is now an optional dependency - install with `uv sync --extra optimize`
 - Simplified `optimize/core.py` and `regression/core.py` imports (removed try/except blocks)
 - Re-rendered all example notebooks with cell outputs included
 - Updated README with symbolic_regression example in notebooks table

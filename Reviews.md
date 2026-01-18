@@ -83,7 +83,7 @@ The codebase demonstrates awareness of computational costs:
 
 1. **API Documentation**: Auto-generated docs via Sphinx would help discoverability
 2. **Inline Comments**: The `diffgeo/` modules are mathematically dense and could benefit from more algorithmic explanations
-3. **Dependency Weight**: Full install includes marimo, cvxpy, and pysr - consider optional extras for lightweight usage
+3. ~~**Dependency Weight**: Full install includes marimo, cvxpy, and pysr - consider optional extras for lightweight usage~~ **ADDRESSED**: marimo and cvxpy are now optional extras
 4. **Edge Cases**: Some numerical code could use more robust NaN/Inf handling
 
 ### Conclusion

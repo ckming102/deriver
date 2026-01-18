@@ -3,12 +3,29 @@ optimize.py - Convex Optimization Interface
 
 A thin wrapper around cvxpy for convex optimization problems.
 Provides a simple interface while letting cvxpy handle solver backends.
+
+Requires: uv sync --extra optimize
 """
 
 from typing import Any, List, Optional, Union, Literal
 
 import sympy as sp
-import cvxpy as cp
+
+try:
+    import cvxpy as cp
+    CVXPY_AVAILABLE = True
+except ImportError:
+    CVXPY_AVAILABLE = False
+    cp = None
+
+
+def _require_cvxpy():
+    """Raise ImportError if cvxpy is not available."""
+    if not CVXPY_AVAILABLE:
+        raise ImportError(
+            "cvxpy is required for optimization. "
+            "Install with: uv sync --extra optimize"
+        )
 
 # Type alias for constraints
 Constraint = Any
@@ -40,6 +57,7 @@ class OptVar:
         domain: Literal['reals', 'nonneg', 'pos', 'integers', 'boolean'] = 'reals',
         bounds: Optional[tuple] = None,
     ):
+        _require_cvxpy()
         self.name = name
         self.shape = shape
         self.domain = domain
