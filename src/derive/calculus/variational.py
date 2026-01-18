@@ -3,18 +3,27 @@ variational.py - Variational Calculus
 
 Provides variational derivatives for deriving equations of motion
 from Lagrangian densities.
+
+Internal Refs:
+    Uses math_api.Symbol, math_api.symbols, math_api.Function, math_api.Rational, math_api.Expr
 """
 
-import sympy as sp
-from sympy import Symbol, symbols, Function, Rational
 from typing import List
+
+from derive.core.math_api import (
+    Symbol,
+    symbols,
+    Function,
+    Rational,
+    Expr,
+)
 
 # Use derive's own APIs for self-consistency
 from derive.calculus.differentiation import D
 from derive.algebra import Simplify
 
 
-def VariationalDerivative(lagrangian: sp.Expr, field: Function, coords: List[Symbol]) -> sp.Expr:
+def VariationalDerivative(lagrangian: Expr, field: Function, coords: List[Symbol]) -> Expr:
     """
     Compute the variational (functional) derivative of a Lagrangian.
 
@@ -53,8 +62,8 @@ def VariationalDerivative(lagrangian: sp.Expr, field: Function, coords: List[Sym
     return Simplify(result)
 
 
-def EulerLagrangeEquation(action_density: sp.Expr, field: Function,
-                          coords: List[Symbol]) -> sp.Expr:
+def EulerLagrangeEquation(action_density: Expr, field: Function,
+                          coords: List[Symbol]) -> Expr:
     """
     Derive the Euler-Lagrange equation from an action density.
 

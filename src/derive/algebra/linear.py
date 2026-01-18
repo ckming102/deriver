@@ -2,17 +2,28 @@
 linear.py - Linear Algebra Operations.
 
 Provides linear algebra functions.
+
+Args:
+    Elements vary by function (matrix entries, vectors, etc.).
+
+Returns:
+    Matrix objects or scalar results depending on operation.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, List, Optional
 
-import sympy as sp
-from sympy import Matrix, eye, zeros, diag, Symbol
-
+from derive.core.math_api import (
+    sp,
+    Matrix,
+    sym_eye as eye,
+    sym_zeros as zeros,
+    sym_diag as diag,
+    Symbol,
+)
 from derive.utils.functional import matrix_method
-
-# Re-export Matrix
-Matrix = Matrix
 
 
 def _ensure_matrix(m: Any) -> Matrix:
@@ -275,7 +286,7 @@ def CharacteristicPolynomial(m: Any, x: Optional[Symbol] = None) -> Any:
         >>> CharacteristicPolynomial(Matrix([[1, 2], [3, 4]]), x)
     """
     if x is None:
-        x = sp.Symbol('x')
+        x = Symbol('x')
     return _ensure_matrix(m).charpoly(x).as_expr()
 
 

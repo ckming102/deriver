@@ -2,10 +2,14 @@
 exponential.py - Exponential and Logarithmic Functions.
 
 Provides Exp, Log, Ln, Sqrt, and Power functions.
+
+Internal Refs:
+    Uses math_api.exp, math_api.log, math_api.sqrt
 """
 
 from typing import Any
-from sympy import exp, log, sqrt
+
+from derive.core.math_api import exp, log, sqrt
 from derive.functions.utils import alias_function
 
 # Direct aliases

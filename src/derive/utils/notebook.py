@@ -3,14 +3,22 @@ notebook.py - Jupyter Notebook Integration
 
 This module provides Jupyter/IPython integration for derive,
 including LaTeX rendering and rich display of expressions.
+
+Args:
+    Various depending on function.
+
+Returns:
+    Various depending on function.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 import io
 import json
 from typing import Any, Optional
 
-import sympy as sp
-from sympy import latex
+from derive.core.math_api import sp, latex
 
 # Optional dependencies for IPython/Jupyter
 try:
@@ -26,9 +34,10 @@ except ImportError:
     HTML = None
 
 # Optional dependency for Marimo
+# Note: mo.md() is only available inside a running marimo notebook
 try:
     import marimo as mo
-    MARIMO_AVAILABLE = True
+    MARIMO_AVAILABLE = hasattr(mo, 'md')
 except ImportError:
     MARIMO_AVAILABLE = False
     mo = None

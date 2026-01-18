@@ -10,12 +10,23 @@ Example:
     >>> f.define(Integer(0), Integer(1))  # f(0) = 1 (specific case)
     >>> f(3)  # Returns 9
     >>> f(0)  # Returns 1 (specific case takes precedence)
+
+Internal Refs:
+    Uses math_api.Wild, math_api.Symbol, math_api.Expr, math_api.Basic,
+    math_api.sympify, math_api.Function, math_api.UndefinedFunction
 """
 
 from typing import Any, Callable, List, Optional, Tuple, Union
-from sympy import Wild, Symbol, Expr, Basic, sympify
-from sympy.core.function import Function, UndefinedFunction
-import sympy as sp
+
+from derive.core.math_api import (
+    Wild,
+    Symbol,
+    Expr,
+    sym_Basic as Basic,
+    sympify,
+    Function,
+    UndefinedFunction,
+)
 
 
 class PatternFunction:

@@ -3,13 +3,17 @@ optimize.py - Convex Optimization Interface
 
 A thin wrapper around cvxpy for convex optimization problems.
 Provides a simple interface while letting cvxpy handle solver backends.
+
+Requires: uv sync --extra optimize
+
+Internal Refs:
+    Uses cvxpy for optimization (specialized library, not abstracted).
 """
 
 from typing import Any, List, Optional, Union, Literal
 
-import sympy as sp
-
-# Optional dependency for cvxpy
+# cvxpy is a specialized optimization library, not abstracted through math_api
+# NOTE: Deferred import - cvxpy is an optional dependency
 try:
     import cvxpy as cp
     CVXPY_AVAILABLE = True
@@ -17,17 +21,17 @@ except ImportError:
     CVXPY_AVAILABLE = False
     cp = None
 
-# Type alias for constraints
-Constraint = Any
-
 
 def _require_cvxpy():
     """Raise ImportError if cvxpy is not available."""
     if not CVXPY_AVAILABLE:
         raise ImportError(
             "cvxpy is required for optimization. "
-            "Install with: pip install cvxpy"
+            "Install with: uv sync --extra optimize"
         )
+
+# Type alias for constraints
+Constraint = Any
 
 
 class OptVar:
@@ -49,6 +53,12 @@ class OptVar:
         >>> w = OptVar('w', bounds=(0, 10))
     """
 
+    # Registry mapping cvxpy Variable id -> OptVar for bound collection.
+    # Uses strong references to ensure OptVars stay alive as long as they're registered.
+    # Note: Can't use WeakKeyDictionary because cp.Variable overrides __eq__ to return
+    # constraints, breaking dict equality checks.
+    _registry: dict = {}
+
     def __init__(
         self,
         name: str,
@@ -56,6 +66,7 @@ class OptVar:
         domain: Literal['reals', 'nonneg', 'pos', 'integers', 'boolean'] = 'reals',
         bounds: Optional[tuple] = None,
     ):
+        _require_cvxpy()
         self.name = name
         self.shape = shape
         self.domain = domain
@@ -65,8 +76,6 @@ class OptVar:
     def _get_cvxpy_var(self):
         """Create or return the underlying cvxpy variable."""
         if self._cvx_var is None:
-            _require_cvxpy()
-
             # Map domain to cvxpy options
             kwargs = {'name': self.name}
             if self.shape:
@@ -82,8 +91,31 @@ class OptVar:
                 kwargs['boolean'] = True
 
             self._cvx_var = cp.Variable(**kwargs)
+            # Register for bound collection (strong reference keeps OptVar alive)
+            OptVar._registry[id(self._cvx_var)] = self
 
         return self._cvx_var
+
+    def get_bound_constraints(self):
+        """
+        Return constraint expressions for the bounds.
+
+        Returns:
+            List of cvxpy constraints (empty if no bounds specified)
+        """
+        if self.bounds is None:
+            return []
+
+        lower, upper = self.bounds
+        cvx_var = self._get_cvxpy_var()
+        constraints = []
+
+        if lower is not None:
+            constraints.append(cvx_var >= lower)
+        if upper is not None:
+            constraints.append(cvx_var <= upper)
+
+        return constraints
 
     @property
     def value(self):
@@ -118,7 +150,7 @@ class OptVar:
         return self._get_cvxpy_var() / _to_cvx(other)
 
     def __pow__(self, other):
-        _require_cvxpy()
+
         return cp.power(self._get_cvxpy_var(), other)
 
     def __neg__(self):
@@ -150,6 +182,28 @@ def _to_cvx(obj):
     return obj
 
 
+def _collect_optvars(obj, collected=None):
+    """Recursively collect all OptVar instances from an expression."""
+    if collected is None:
+        collected = []
+
+    if isinstance(obj, OptVar):
+        # Use identity check since OptVar.__eq__ is overridden for constraints
+        if not any(v is obj for v in collected):
+            collected.append(obj)
+    elif CVXPY_AVAILABLE and isinstance(obj, cp.Variable):
+        # Look up the OptVar from the registry (keyed by id)
+        optvar = OptVar._registry.get(id(obj))
+        if optvar is not None and not any(v is optvar for v in collected):
+            collected.append(optvar)
+    elif hasattr(obj, 'args'):
+        # cvxpy expression - traverse arguments
+        for arg in obj.args:
+            _collect_optvars(arg, collected)
+
+    return collected
+
+
 class OptimizationProblem:
     """
     Base class for optimization problems.
@@ -173,6 +227,7 @@ class OptimizationProblem:
         self.sense = sense
         self._problem = None
         self._status = None
+        self._optvars = []  # Holds OptVars to prevent GC during solve
 
     def solve(
         self,
@@ -208,6 +263,15 @@ class OptimizationProblem:
         # Convert constraints
         cvx_constraints = [_to_cvx(c) for c in self.constraints]
 
+        # Collect all OptVar instances and add their bound constraints
+        self._optvars = []
+        _collect_optvars(self.objective, self._optvars)
+        for c in self.constraints:
+            _collect_optvars(c, self._optvars)
+
+        for var in self._optvars:
+            cvx_constraints.extend(var.get_bound_constraints())
+
         # Create and solve problem
         self._problem = cp.Problem(obj, cvx_constraints)
 
@@ -219,6 +283,11 @@ class OptimizationProblem:
         result = self._problem.solve(**solve_kwargs)
         self._status = self._problem.status
 
+        # Clean up global registry - OptVars are now held by self._optvars
+        for var in self._optvars:
+            if var._cvx_var is not None:
+                OptVar._registry.pop(id(var._cvx_var), None)
+
         return result
 
     @property
@@ -229,8 +298,7 @@ class OptimizationProblem:
     @property
     def is_solved(self) -> bool:
         """Check if problem was solved optimally."""
-        if not CVXPY_AVAILABLE:
-            return False
+        _require_cvxpy()
         return self._status == cp.OPTIMAL
 
     @property

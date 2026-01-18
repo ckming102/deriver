@@ -3,13 +3,30 @@ plotting.py - Plotting Functions
 
 This module provides Plot and ListPlot functions with syntax.
 Uses matplotlib under the hood.
+
+Args:
+    expr_or_func: SymPy expression, Python function, or list of these.
+    var_range: Tuple (var, xmin, xmax) specifying variable and range.
+
+Returns:
+    matplotlib Figure object.
+
+Internal Refs:
+    Uses derive.core.math_api for NumPy/SymPy operations.
+    Uses matplotlib for rendering.
 """
 
 import matplotlib.pyplot as plt
 import matplotlib
-import numpy as np
-import sympy as sp
 from typing import Union, List, Tuple, Dict, Optional, Callable, Any
+
+from derive.core.math_api import (
+    np,
+    sp,
+    np_linspace,
+    sym_lambdify as lambdify,
+    np_number,
+)
 
 # Use non-interactive backend by default for better notebook compatibility
 matplotlib.use('Agg')
@@ -121,7 +138,7 @@ def Plot(expr_or_func, var_range, **options):
         raise ValueError("var_range must be (var, xmin, xmax)")
 
     # Generate x values
-    x_vals = np.linspace(xmin_val, xmax_val, 1000)
+    x_vals = np_linspace(xmin_val, xmax_val, 1000)
 
     # Handle single expression or list of expressions
     exprs = expr_or_func if isinstance(expr_or_func, list) else [expr_or_func]
@@ -136,7 +153,7 @@ def Plot(expr_or_func, var_range, **options):
         # Convert expression to numerical function
         if hasattr(expr, 'free_symbols'):
             # SymPy expression
-            f = sp.lambdify(var, expr, modules=['numpy'])
+            f = lambdify(var, expr, modules=['numpy'])
         elif callable(expr):
             # Already a function
             f = expr
@@ -205,7 +222,7 @@ def ListPlot(data, **options):
         if isinstance(data[0][0], (list, tuple)):
             # Single dataset of (x,y) pairs
             datasets = [data]
-        elif isinstance(data[0][0], (int, float, np.number)):
+        elif isinstance(data[0][0], (int, float, np_number)):
             # Could be multiple y-value lists or single list of (x,y)
             if len(data[0]) == 2 and not isinstance(data[1][0], (list, tuple)):
                 # Likely list of (x,y) pairs
@@ -230,13 +247,14 @@ def ListPlot(data, **options):
     for i, dataset in enumerate(datasets):
         # Determine if (x,y) pairs or just y values
         if isinstance(dataset[0], (list, tuple)) and len(dataset[0]) == 2:
-            # (x, y) pairs
-            x_vals = [p[0] for p in dataset]
-            y_vals = [p[1] for p in dataset]
+            # (x, y) pairs - use vectorized numpy array operations
+            arr = np.array(dataset)
+            x_vals = arr[:, 0]
+            y_vals = arr[:, 1]
         else:
-            # Just y values
-            x_vals = list(range(1, len(dataset) + 1))
-            y_vals = list(dataset)
+            # Just y values - use vectorized arange
+            x_vals = np.arange(1, len(dataset) + 1)
+            y_vals = np.asarray(dataset)
 
         plot_color = colors[i % len(colors)]
         if isinstance(plot_color, str) and plot_color[0].isupper():
@@ -283,7 +301,7 @@ def ListLinePlot(data, **options):
     if isinstance(data[0], list) and len(data[0]) > 0:
         if isinstance(data[0][0], (list, tuple)):
             datasets = [data]
-        elif isinstance(data[0][0], (int, float, np.number)):
+        elif isinstance(data[0][0], (int, float, np_number)):
             if len(data[0]) == 2 and not isinstance(data[1][0], (list, tuple)):
                 datasets = [data]
             else:
@@ -299,11 +317,14 @@ def ListLinePlot(data, **options):
 
     for i, dataset in enumerate(datasets):
         if isinstance(dataset[0], (list, tuple)) and len(dataset[0]) == 2:
-            x_vals = [p[0] for p in dataset]
-            y_vals = [p[1] for p in dataset]
+            # (x, y) pairs - use vectorized numpy array operations
+            arr = np.array(dataset)
+            x_vals = arr[:, 0]
+            y_vals = arr[:, 1]
         else:
-            x_vals = list(range(1, len(dataset) + 1))
-            y_vals = list(dataset)
+            # Just y values - use vectorized arange
+            x_vals = np.arange(1, len(dataset) + 1)
+            y_vals = np.asarray(dataset)
 
         plot_color = colors[i % len(colors)]
         label = legend_labels[i] if legend_labels and i < len(legend_labels) else None
@@ -340,17 +361,17 @@ def ParametricPlot(funcs, t_range, **options):
     else:
         raise ValueError("t_range must be (t, tmin, tmax)")
 
-    t_vals = np.linspace(tmin_val, tmax_val, 1000)
+    t_vals = np_linspace(tmin_val, tmax_val, 1000)
 
     # Parse functions
     if len(funcs) == 2:
         fx, fy = funcs
         if hasattr(fx, 'free_symbols'):
-            fx_func = sp.lambdify(t_var, fx, modules=['numpy'])
+            fx_func = lambdify(t_var, fx, modules=['numpy'])
         else:
             fx_func = fx
         if hasattr(fy, 'free_symbols'):
-            fy_func = sp.lambdify(t_var, fy, modules=['numpy'])
+            fy_func = lambdify(t_var, fy, modules=['numpy'])
         else:
             fy_func = fy
 

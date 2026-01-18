@@ -19,6 +19,7 @@ A powerful symbolic mathematics library for Python.
 - **Custom Types**: Define your own types (Quaternion, Vector3D included)
 - **Probability**: Distribution functions and statistics
 - **Optimization**: Convex optimization via cvxpy (optional)
+- **Symbolic Regression**: Discover formulas from data via PySR
 - **Plotting**: Publication-quality mathematical plots
 - **Composable API**: Pipe operations and functional composition
 
@@ -30,6 +31,17 @@ To install, clone the repository and sync the dependencies:
 git clone git@github.com:closedform/deriver.git
 cd deriver
 uv sync
+```
+
+### Optional Dependencies
+
+Some features require optional dependencies:
+
+```bash
+uv sync --extra notebooks   # Marimo interactive notebooks
+uv sync --extra optimize    # Convex optimization (cvxpy)
+uv sync --extra regression  # Symbolic regression (pysr + Julia)
+uv sync --extra all         # All optional dependencies
 ```
 
 ## Quick Start
@@ -191,15 +203,19 @@ The `examples/` directory contains interactive Marimo notebooks demonstrating co
 
 | Notebook | Description | GitHub | Rendered |
 |----------|-------------|--------|----------|
-| `derive_marimo.py` | Intro notebook for core calculus/plotting | [IPYNB](examples/rendered/derive_marimo.ipynb) | [HTML](examples/rendered/derive_marimo.html) |
-| `linearized_gravity.py` | Metric perturbations and gravitational waves | [IPYNB](examples/rendered/linearized_gravity.ipynb) | [HTML](examples/rendered/linearized_gravity.html) |
-| `quantum_mechanics.py` | Harmonic oscillator, hydrogen atom, perturbation theory | [IPYNB](examples/rendered/quantum_mechanics.ipynb) | [HTML](examples/rendered/quantum_mechanics.html) |
-| `classical_mechanics.py` | Lagrangian/Hamiltonian mechanics, Noether's theorem | [IPYNB](examples/rendered/classical_mechanics.ipynb) | [HTML](examples/rendered/classical_mechanics.html) |
-| `electromagnetism.py` | Maxwell equations, gauge theory, EM waves | [IPYNB](examples/rendered/electromagnetism.ipynb) | [HTML](examples/rendered/electromagnetism.html) |
-| `differential_geometry.py` | Manifolds, curvature tensors, connections | [IPYNB](examples/rendered/differential_geometry.ipynb) | [HTML](examples/rendered/differential_geometry.html) |
-| `renormalization_group.py` | CLT as RG fixed point, universality, beta functions | [IPYNB](examples/rendered/renormalization_group.ipynb) | [HTML](examples/rendered/renormalization_group.html) |
+| `derive_marimo.py` | Intro notebook for core calculus/plotting | [IPYNB](examples/rendered/derive_marimo.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/derive_marimo.html) |
+| `symbolic_regression.py` | Discover formulas from data with FindFormula/PySR | [IPYNB](examples/rendered/symbolic_regression.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/symbolic_regression.html) |
+| `classical_mechanics.py` | Lagrangian/Hamiltonian mechanics, Noether's theorem | [IPYNB](examples/rendered/classical_mechanics.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/classical_mechanics.html) |
+| `quantum_mechanics.py` | Harmonic oscillator, hydrogen atom, perturbation theory | [IPYNB](examples/rendered/quantum_mechanics.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/quantum_mechanics.html) |
+| `electromagnetism.py` | Maxwell equations, gauge theory, EM waves | [IPYNB](examples/rendered/electromagnetism.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/electromagnetism.html) |
+| `differential_geometry.py` | Manifolds, curvature tensors, connections | [IPYNB](examples/rendered/differential_geometry.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/differential_geometry.html) |
+| `linearized_gravity.py` | Metric perturbations and gravitational waves | [IPYNB](examples/rendered/linearized_gravity.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/linearized_gravity.html) |
+| `renormalization_group.py` | CLT as RG fixed point, universality, beta functions | [IPYNB](examples/rendered/renormalization_group.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/renormalization_group.html) |
+| `numerical_relativity_stencils.py` | Lagrangians to finite difference stencils, code generation | [IPYNB](examples/rendered/numerical_relativity_stencils.ipynb) | [HTML](https://closedform.github.io/deriver/examples/rendered/numerical_relativity_stencils.html) |
 
 The RG notebook demonstrates how the Central Limit Theorem emerges as a renormalization group fixed point, inspired by [The Simplest Renormalization Group](https://dinunno.substack.com/p/the-simplest-renormalization-group).
+
+The numerical relativity stencils notebook demonstrates the pipeline from Lagrangians to numerical simulation code, based on [arXiv:1608.04408](https://arxiv.org/abs/1608.04408).
 
 ### Interactive Notebooks
 
@@ -229,14 +245,15 @@ MIT License
 
 Thanks to the open-source libraries Derive is built on:
 
-- [SymPy](https://www.sympy.org/)
-- [NumPy](https://numpy.org/)
-- [SciPy](https://scipy.org/)
-- [Matplotlib](https://matplotlib.org/)
-- [Polars](https://www.pola.rs/)
-- [mpmath](https://mpmath.org/)
-- [Rich](https://rich.readthedocs.io/)
-- [Marimo](https://marimo.io/)
 - [CVXPY](https://www.cvxpy.org/) (optional, for optimization features)
+- [Marimo](https://marimo.io/)
+- [Matplotlib](https://matplotlib.org/)
+- [mpmath](https://mpmath.org/)
+- [NumPy](https://numpy.org/)
+- [Polars](https://www.pola.rs/)
+- [PySR](https://astroautomata.com/PySR/) (symbolic regression)
+- [Rich](https://rich.readthedocs.io/)
+- [SciPy](https://scipy.org/)
+- [SymPy](https://www.sympy.org/)
 
 **Note**: This project is the result of a collaboration between Brandon DiNunno, Tom Mainiero, and Claude Code. Any likeness to proprietary APIs is strictly coincidental.

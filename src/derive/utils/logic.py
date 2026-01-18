@@ -2,14 +2,31 @@
 logic.py - Logic and Control Flow.
 
 Provides comparison operators, boolean operators, and control flow functions.
+
+Internal Refs:
+    Uses math_api.Eq, math_api.Ne, math_api.Lt, math_api.Le, math_api.Gt, math_api.Ge,
+    math_api.And, math_api.Or, math_api.Not, math_api.Xor, math_api.Nand, math_api.Nor,
+    math_api.Piecewise, math_api.Max, math_api.Min
 """
 
 from typing import Any, Optional
-from sympy import (
-    Eq, Ne, Lt, Le, Gt, Ge,
-    And as sympy_And, Or as sympy_Or, Not as sympy_Not,
-    Xor as sympy_Xor, Nand as sympy_Nand, Nor as sympy_Nor,
-    Piecewise as sympy_Piecewise, Max as sympy_Max, Min as sympy_Min,
+
+from derive.core.math_api import (
+    Eq,
+    Ne,
+    Lt,
+    Le,
+    Gt,
+    Ge,
+    And as sympy_And,
+    Or as sympy_Or,
+    Not as sympy_Not,
+    Xor as sympy_Xor,
+    Nand as sympy_Nand,
+    Nor as sympy_Nor,
+    Piecewise as sympy_Piecewise,
+    Max as sympy_Max,
+    Min as sympy_Min,
 )
 
 # Comparison operators

@@ -3,11 +3,18 @@ base.py - Base Classes for Custom Types
 
 Provides CustomType base class and DefineType factory function
 for creating new mathematical types.
+
+Internal Refs:
+    Uses math_api.Symbol, math_api.sympify, math_api.latex
 """
 
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-import sympy as sp
-from sympy import Symbol, sympify, latex
+
+from derive.core.math_api import (
+    Symbol,
+    sympify,
+    latex,
+)
 
 
 class CustomType:

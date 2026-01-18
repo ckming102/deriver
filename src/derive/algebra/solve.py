@@ -2,12 +2,26 @@
 solve.py - Equation Solving.
 
 Provides equation solvers: Solve, NSolve, FindRoot.
+
+Args:
+    eqns: Equation(s) to solve.
+    vars: Variable(s) to solve for.
+
+Returns:
+    List of solution dictionaries.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy/SciPy operations.
 """
 
 from typing import Any, List, Dict, Tuple
-import sympy as sp
-from sympy import solve
-from scipy import optimize as scipy_optimize
+
+from derive.core.math_api import (
+    sp,
+    sym_solve as solve,
+    scipy_optimize,
+    sym_lambdify as lambdify,
+)
 
 
 def Solve(eqns: Any, vars: Any, **kwargs) -> List[Dict]:
@@ -81,7 +95,7 @@ def FindRoot(expr: Any, var_guess: Tuple[Any, float]) -> Dict:
     """
     if isinstance(var_guess, (list, tuple)) and len(var_guess) == 2:
         var, x0 = var_guess
-        f = sp.lambdify(var, expr, modules=['numpy'])
+        f = lambdify(var, expr, modules=['numpy'])
 
         result = scipy_optimize.fsolve(f, float(x0))
         return {var: result[0]}

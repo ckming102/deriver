@@ -2,15 +2,31 @@
 integration.py - Integration Operations.
 
 Provides symbolic and numerical integration.
+
+Args:
+    expr: Expression to integrate.
+    *args: Integration variable(s) and optional bounds.
+
+Returns:
+    The integral of the expression.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy/NumPy/SciPy operations.
+    Uses derive.calculus.differentiation.D for Jacobian computation.
+    Uses derive.algebra.Simplify for expression simplification.
 """
 
 from typing import Any, Union, Tuple
-import numpy as np
-import sympy as sp
-from sympy import integrate, oo, Abs, Integral
-from sympy.solvers import solve
-from scipy import integrate as scipy_integrate
+import warnings
 
+from derive.core.math_api import (
+    sp, np,
+    sym_integrate as integrate, oo, Abs, Integral,
+    solvers_solve as solve,
+    scipy_integrate,
+    sym_lambdify as lambdify,
+    np_inf,
+)
 from derive.calculus.differentiation import D
 from derive.algebra import Simplify
 
@@ -78,11 +94,11 @@ def NIntegrate(expr: Any, *args: Tuple[Any, Any, Any], **kwargs) -> float:
         var, a, b = args[0]
 
         # Convert bounds to float (handle Infinity)
-        a_val = float(a) if a != oo and a != -oo else (np.inf if a == oo else -np.inf)
-        b_val = float(b) if b != oo and b != -oo else (np.inf if b == oo else -np.inf)
+        a_val = float(a) if a != oo and a != -oo else (np_inf if a == oo else -np_inf)
+        b_val = float(b) if b != oo and b != -oo else (np_inf if b == oo else -np_inf)
 
         # Create numerical function
-        f = sp.lambdify(var, expr, modules=['numpy', 'scipy'])
+        f = lambdify(var, expr, modules=['numpy', 'scipy'])
 
         result, error = scipy_integrate.quad(f, a_val, b_val)
         return result
@@ -138,6 +154,26 @@ def ChangeVariables(
         # Solve for new bounds: find u such that substitution = a, substitution = b
         new_a_solutions = solve(substitution - a, new_var)
         new_b_solutions = solve(substitution - b, new_var)
+
+        # Check for non-injective substitutions (multiple solutions)
+        if len(new_a_solutions) > 1:
+            warnings.warn(
+                f"Non-injective substitution detected: solve({substitution} - {a}, {new_var}) "
+                f"has {len(new_a_solutions)} solutions: {new_a_solutions}. "
+                f"Using first solution {new_a_solutions[0]}. Consider restricting the domain "
+                f"or specifying the new variable with appropriate assumptions (e.g., positive=True).",
+                UserWarning,
+                stacklevel=2
+            )
+        if len(new_b_solutions) > 1:
+            warnings.warn(
+                f"Non-injective substitution detected: solve({substitution} - {b}, {new_var}) "
+                f"has {len(new_b_solutions)} solutions: {new_b_solutions}. "
+                f"Using first solution {new_b_solutions[0]}. Consider restricting the domain "
+                f"or specifying the new variable with appropriate assumptions (e.g., positive=True).",
+                UserWarning,
+                stacklevel=2
+            )
 
         # Take the first real solution (could be improved with assumptions)
         new_a = new_a_solutions[0] if new_a_solutions else a

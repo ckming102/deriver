@@ -2,10 +2,21 @@
 differentiation.py - Differentiation Operations.
 
 Provides differentiation with the D function.
+
+Args:
+    expr: Expression to differentiate.
+    *args: Variables to differentiate with respect to.
+
+Returns:
+    The derivative of the expression.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, Union, Tuple
-from sympy import diff
+
+from derive.core.math_api import sym_diff as diff
 
 
 def D(expr: Any, *args: Union[Any, Tuple[Any, int]]) -> Any:

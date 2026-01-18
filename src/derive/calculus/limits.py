@@ -2,10 +2,22 @@
 limits.py - Limit Operations.
 
 Provides limit computation.
+
+Args:
+    expr: Expression to take the limit of.
+    var: Variable approaching the point.
+    point: Point to approach.
+
+Returns:
+    The limit value.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any, Optional
-from sympy import limit
+
+from derive.core.math_api import sym_limit as limit
 
 
 def Limit(expr: Any, var: Any, point: Any, direction: Optional[str] = None) -> Any:

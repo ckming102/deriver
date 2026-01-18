@@ -2,13 +2,32 @@
 simplify.py - Expression Simplification and Transformation.
 
 Provides functions for simplifying and transforming symbolic expressions.
+
+Args:
+    expr: Expression to simplify/transform.
+
+Returns:
+    Simplified or transformed expression.
+
+Internal Refs:
+    Uses derive.core.math_api for SymPy operations.
 """
 
 from typing import Any
-import sympy as sp
-from sympy import (
-    simplify, expand, factor, collect, cancel, apart, together,
-    trigsimp, powsimp, logcombine,
+
+from derive.core.math_api import (
+    sp,
+    sym_simplify as simplify,
+    sym_expand as expand,
+    sym_factor as factor,
+    sym_collect as collect,
+    sym_cancel as cancel,
+    sym_apart as apart,
+    sym_together as together,
+    sym_trigsimp as trigsimp,
+    sym_powsimp as powsimp,
+    sym_logcombine as logcombine,
+    sym_expand_trig,
 )
 
 # Direct aliases
@@ -39,7 +58,7 @@ def TrigExpand(expr: Any) -> Any:
         >>> TrigExpand(Sin(2*x))
         2*sin(x)*cos(x)
     """
-    return sp.expand_trig(expr)
+    return sym_expand_trig(expr)
 
 
 def TrigReduce(expr: Any) -> Any:

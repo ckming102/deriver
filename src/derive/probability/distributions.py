@@ -2,11 +2,26 @@
 distributions.py - Probability Distributions.
 
 Provides probability distribution constructors and functions.
+
+Args:
+    Parameters vary by distribution (mu, sigma, lambda, n, p, etc.).
+
+Returns:
+    scipy.stats distribution objects for use with PDF, CDF, etc.
+
+Internal Refs:
+    Uses derive.core.math_api for NumPy/SciPy operations.
 """
 
 from typing import Any, Optional, Callable, Union
-import numpy as np
-from scipy import stats as scipy_stats
+
+from derive.core.math_api import (
+    np,
+    scipy_stats,
+    np_mean,
+    np_var,
+    np_std,
+)
 
 
 def NormalDistribution(mu: float = 0, sigma: float = 1):
@@ -148,7 +163,7 @@ def Mean(dist_or_data: Any) -> float:
     """
     if hasattr(dist_or_data, 'mean'):
         return dist_or_data.mean()
-    return np.mean(dist_or_data)
+    return np_mean(dist_or_data)
 
 
 def Variance(dist_or_data: Any) -> float:
@@ -167,7 +182,7 @@ def Variance(dist_or_data: Any) -> float:
     """
     if hasattr(dist_or_data, 'var'):
         return dist_or_data.var()
-    return np.var(dist_or_data)
+    return np_var(dist_or_data)
 
 
 def StandardDeviation(dist_or_data: Any) -> float:
@@ -182,10 +197,10 @@ def StandardDeviation(dist_or_data: Any) -> float:
     """
     if hasattr(dist_or_data, 'std'):
         return dist_or_data.std()
-    return np.std(dist_or_data)
+    return np_std(dist_or_data)
 
 
-def RandomVariate(dist: Any, n: Optional[int] = None) -> Union[float, np.ndarray]:
+def RandomVariate(dist: Any, n: Optional[int] = None) -> Union[float, Any]:
     """
     Generate random variates from distribution.
 
@@ -228,7 +243,7 @@ def Probability(condition: Callable, dist: Any) -> float:
     """
     if callable(condition):
         samples = dist.rvs(size=100000)
-        return np.mean(condition(samples))
+        return np_mean(condition(samples))
     raise ValueError("Condition must be callable")
 
 
