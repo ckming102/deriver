@@ -257,3 +257,10 @@ Thanks to the open-source libraries Derive is built on:
 - [SymPy](https://www.sympy.org/)
 
 **Note**: This project is the result of a collaboration between Brandon DiNunno, Tom Mainiero, and Claude Code. Any likeness to proprietary APIs is strictly coincidental.
+
+## Official Logo 
+
+<p align="center">
+    <img src="https://i.imgur.com/82dSLbo.png" width="380" alt="The Derive Mascots: Der and Ive">
+</p>
+
